@@ -7,6 +7,6 @@ namespace ClothingShop.Domain.Entities
         [Required]
         [MaxLength(50)]
         public string Name { get; set; } = string.Empty;
-        public ICollection<User> Users { get; set; }
+        public ICollection<User> Users { get; set; } = new List<User>();
     }
 }

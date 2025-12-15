@@ -1,6 +1,0 @@
-@ClothingShop.API_HostAddress = http://localhost:5133
-
-GET {{ClothingShop.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
