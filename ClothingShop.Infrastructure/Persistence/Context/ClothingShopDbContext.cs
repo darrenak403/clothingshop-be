@@ -24,3 +24,4 @@ namespace ClothingShop.Infrastructure.Persistence.Context
         }
     }
 }
+ 
