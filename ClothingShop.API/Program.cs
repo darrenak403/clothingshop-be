@@ -2,6 +2,7 @@
 using ClothingShop.Application.Services.Implementations;
 using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Domain.Interfaces;
+using ClothingShop.Infrastructure.Persistence;
 using ClothingShop.Infrastructure.Persistence.Context;
 using ClothingShop.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. CẤU HÌNH DATABASE (Dùng SQL Server)
+// 1. CẤU HÌNH DATABASE (Dùng MySQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ClothingShopDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -72,20 +73,22 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// 5. SEED DATA (Tự động chạy khi khởi động app)
+// 5. MIGRATE & SEED DATA
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<ClothingShopDbContext>();
-        // Tạm thời comment dòng này lại nếu bạn chưa tạo file DbInitializer
-        // DbInitializer.Initialize(context); 
+
+        context.Database.Migrate();
+
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Lỗi khi seeding data.");
+        logger.LogError(ex, "Lỗi khi setup database.");
     }
 }
 
