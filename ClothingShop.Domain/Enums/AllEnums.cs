@@ -25,4 +25,12 @@
         Paid = 1,
         Refunded = 2
     }
+
+    public enum AttemptStatus
+    {
+        Pending = 0,
+        Used = 1,
+        Expired = 2,
+        Failed = 3,
+    }
 }

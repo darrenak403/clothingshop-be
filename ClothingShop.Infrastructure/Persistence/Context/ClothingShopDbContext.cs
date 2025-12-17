@@ -15,6 +15,7 @@ namespace ClothingShop.Infrastructure.Persistence.Context
 
         // --- Nhóm Identity (Người dùng) ---
         public DbSet<User> Users { get; set; }
+        public DbSet<PasswordResetHistory> PasswordResetHistories { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Address> Addresses { get; set; }
 
@@ -70,6 +71,30 @@ namespace ClothingShop.Infrastructure.Persistence.Context
             {
                 e.HasIndex(u => u.Email).IsUnique(); // Email là duy nhất
                 e.Property(u => u.Email).IsRequired().HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<PasswordResetHistory>(entity =>
+            {
+                entity.ToTable("PasswordResetHistories");
+
+                entity.HasKey(e => e.UserId);
+
+                entity.Property(e => e.Otp)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Pending");
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PasswordResetHistories)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.UserId, e.OtpGeneratedAt });
             });
 
             // --- CATEGORY ---

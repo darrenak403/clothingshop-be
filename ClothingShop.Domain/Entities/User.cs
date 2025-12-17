@@ -28,6 +28,7 @@
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public Cart? Cart { get; set; } // 1 User có 1 giỏ hàng
+        public ICollection<PasswordResetHistory> PasswordResetHistories { get; set; } = new List<PasswordResetHistory>();
 
     }
 }

@@ -112,7 +112,6 @@ namespace ClothingShop.Application.Services.Implementations
             return Convert.ToBase64String(randomBytes);
         }
 
-
         public async Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
             var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
@@ -158,6 +157,35 @@ namespace ClothingShop.Application.Services.Implementations
 
             var result = await GenerateAndSaveTokensAsync(user);
             return ApiResponse<LoginResponse>.SuccessResponse(result, "Token refreshed", HttpStatusCode.OK);
+        }
+
+        public async Task<ApiResponse<string>> LogoutAsync(string refreshToken)
+        {
+            var user = await _userRepo.FindAsync(u => u.RefreshToken == refreshToken);
+            if (user == null)
+                return ApiResponse<string>.FailureResponse("Invalid refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiry = null;
+            await _userRepo.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ApiResponse<string>.SuccessResponse("Logged out successfully.", "Logged out", HttpStatusCode.OK);
+        }
+
+        public async Task<ApiResponse<string>> ForgotPasswordAysnc(ForgotPasswordRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
+        {
+            throw new NotImplementedException();
         }
     }
 }

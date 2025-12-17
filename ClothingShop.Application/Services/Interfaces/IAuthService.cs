@@ -8,5 +8,10 @@ namespace ClothingShop.Application.Services.Interfaces
         Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request);
         Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request);
         Task<ApiResponse<LoginResponse>> RefreshTokenAsync(string refreshToken);
+        Task<ApiResponse<string>> LogoutAsync(string refreshToken);
+        Task<ApiResponse<string>> ForgotPasswordAysnc(ForgotPasswordRequest request);
+        Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request);
+
     }
 }
