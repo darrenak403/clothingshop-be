@@ -1,6 +1,8 @@
 ﻿using ClothingShop.Application.Services.Interfaces;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 
 namespace ClothingShop.Infrastructure.Services
@@ -8,9 +10,12 @@ namespace ClothingShop.Infrastructure.Services
     public class SmtpEmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
-        public SmtpEmailService(IConfiguration configuration)
+        private readonly ILogger<SmtpEmailService> _logger;
+
+        public SmtpEmailService(IConfiguration configuration, ILogger<SmtpEmailService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
@@ -32,9 +37,9 @@ namespace ClothingShop.Infrastructure.Services
 
                 var host = _configuration["Smtp:Host"];
                 var port = int.Parse(_configuration["Smtp:Port"] ?? "587");
-                var useSsl = bool.Parse(_configuration["Smtp:UseSsl"] ?? "true");
 
-                await client.ConnectAsync(host, port, useSsl);
+                // Gmail requires StartTls
+                await client.ConnectAsync(host, port, SecureSocketOptions.StartTls);
 
                 var username = _configuration["Smtp:Username"];
                 var password = _configuration["Smtp:Password"];
@@ -46,11 +51,13 @@ namespace ClothingShop.Infrastructure.Services
 
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
+
+                _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
             }
             catch (Exception ex)
             {
-                // Log the exception or handle it as needed
-                throw new InvalidOperationException("Failed to send email.", ex);
+                _logger.LogError(ex, "Failed to send email to {ToEmail}. Error: {ErrorMessage}", toEmail, ex.Message);
+                throw new InvalidOperationException($"Failed to send email: {ex.Message}", ex);
             }
         }
     }
