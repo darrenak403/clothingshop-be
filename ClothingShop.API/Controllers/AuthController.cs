@@ -48,5 +48,37 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _authService.LogoutAsync(request.RefreshToken);
+            if (!response.Success)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _authService.ForgotPasswordAsync(request);
+            if (!response.Success)
+                return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _authService.ResetPasswordAsync(request);
+            if (!response.Success)
+                return BadRequest(response);
+            return Ok(response);
+        }
     }
 }
