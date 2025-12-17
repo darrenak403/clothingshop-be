@@ -1,6 +1,4 @@
-using System;
-
-namespace ClothingShop.Application.DTOs.Auth;
+namespace ClothingShop.Application.DTOs.User;
 
 public class UserDto
 {

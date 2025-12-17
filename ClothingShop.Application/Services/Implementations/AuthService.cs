@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using ClothingShop.Application.DTOs.Auth;
+using ClothingShop.Application.DTOs.User;
 using ClothingShop.Application.Interfaces;
 using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Application.Wrapper;
@@ -79,9 +80,9 @@ namespace ClothingShop.Application.Services.Implementations
 
         private string GenerateJwtToken(User user, string roleName)
         {
-            var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.");
-            var issuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured.");
-            var audience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured.");
+            var key = _configuration["Jwt:Key"];
+            var issuer = _configuration["Jwt:Issuer"];
+            var audience = _configuration["Jwt:Audience"];
             var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
 
             var claims = new List<Claim>

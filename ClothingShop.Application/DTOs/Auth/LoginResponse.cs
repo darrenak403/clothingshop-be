@@ -1,4 +1,5 @@
 using System;
+using ClothingShop.Application.DTOs.User;
 
 namespace ClothingShop.Application.DTOs.Auth;
 

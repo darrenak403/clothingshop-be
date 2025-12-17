@@ -37,5 +37,16 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _authService.RefreshTokenAsync(request.RefreshToken);
+            if (!response.Success)
+                return Unauthorized(response);
+            return Ok(response);
+        }
+
     }
 }
