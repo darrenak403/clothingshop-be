@@ -14,8 +14,8 @@ namespace ClothingShop.Domain.Entities
         public DateTime OtpGeneratedAt { get; set; }
         public DateTime OtpExpiresAt { get; set; }
         public bool IsUsed { get; set; } = false;
-        public DateTime UsedAt { get; set; }
-        public DateTime IsExpired { get; set; }
+        public DateTime? UsedAt { get; set; }
+        public bool IsExpired { get; set; } = false;
         public int AttemptCount { get; set; } = 0;
         public AttemptStatus Status { get; set; } = AttemptStatus.Pending;
     }

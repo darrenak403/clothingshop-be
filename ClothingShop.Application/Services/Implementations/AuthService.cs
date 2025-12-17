@@ -197,14 +197,8 @@ namespace ClothingShop.Application.Services.Implementations
 
             // 2. Generate OTP settings
             var otp = GenerateOtp();
-            var otpExpiryMinutes = int.Parse(_configuration["Auth:OtpExpiryMinutes"] ?? "15");
+            var otpExpiryMinutes = int.Parse(_configuration["Auth:OtpExpiryMinutes"] ?? "5");
 
-            // ========================================================================
-            // BẮT ĐẦU SỬA LỖI DUPLICATE ENTRY TẠI ĐÂY
-            // ========================================================================
-
-            // Tìm xem user này đã có dòng nào trong bảng PasswordResetHistory chưa
-            // Lưu ý: Giả sử UserId là Khóa chính (PK) của bảng này
             var existingHistory = await _passwordResetHistoryRepo.GetByIdAsync(user.Id);
 
             PasswordResetHistory historyToEmail; // Biến tạm để dùng gửi email
@@ -224,7 +218,7 @@ namespace ClothingShop.Application.Services.Implementations
             }
             else
             {
-                // B. INSERT: Nếu chưa có, tạo mới
+                // B. INSERT: Nếu chưa có, tạo mới  
                 var newHistory = new PasswordResetHistory
                 {
                     UserId = user.Id,
