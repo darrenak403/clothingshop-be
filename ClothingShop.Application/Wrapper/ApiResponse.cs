@@ -6,9 +6,9 @@ namespace ClothingShop.Application.Wrapper
     {
         public int Status { get; set; }
         public bool Success { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
-        public string Errors { get; set; }
+        public string? Message { get; set; }
+        public T? Data { get; set; }
+        public string? Errors { get; set; }
 
         public static ApiResponse<T> SuccessResponse(T data, string message = "Success", HttpStatusCode status = HttpStatusCode.OK)
         {

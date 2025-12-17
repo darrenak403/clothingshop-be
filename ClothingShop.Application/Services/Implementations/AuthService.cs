@@ -90,7 +90,7 @@ namespace ClothingShop.Application.Services.Implementations
 
         private string GenerateJwtToken(User user, string roleName)
         {
-            var key = _configuration["Jwt:Key"];
+            var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured in appsettings.json");
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
             var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
@@ -102,6 +102,7 @@ namespace ClothingShop.Application.Services.Implementations
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Role, roleName)
             };
+
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

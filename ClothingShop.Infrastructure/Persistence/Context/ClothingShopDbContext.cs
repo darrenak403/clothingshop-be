@@ -1,4 +1,5 @@
 ﻿using ClothingShop.Domain.Entities;
+using ClothingShop.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClothingShop.Infrastructure.Persistence.Context
@@ -86,7 +87,7 @@ namespace ClothingShop.Infrastructure.Persistence.Context
                 entity.Property(e => e.Status)
                     .IsRequired()
                     .HasMaxLength(20)
-                    .HasDefaultValue("Pending");
+                    .HasDefaultValue(AttemptStatus.Pending);
 
                 entity.HasOne(e => e.User)
                     .WithMany(u => u.PasswordResetHistories)
@@ -144,15 +145,6 @@ namespace ClothingShop.Infrastructure.Persistence.Context
 
             // --- VOUCHER ---
             modelBuilder.Entity<Voucher>(e => { e.HasIndex(v => v.Code).IsUnique(); });
-
-            // --------------------------------------------------
-            // C. Seed Data (Dữ liệu mẫu)
-            // --------------------------------------------------
-            modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "Admin" },
-                new Role { Id = 2, Name = "Staff" },
-                new Role { Id = 3, Name = "Customer" }
-            );
         }
     }
 }
