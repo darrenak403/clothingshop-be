@@ -8,11 +8,22 @@ namespace ClothingShop.Infrastructure.Repositories
 {
     public class PasswordResetHistoryRepository : IPasswordResetHistoryRepository
     {
-        protected readonly ClothingShopDbContext _context;
+        private readonly ClothingShopDbContext _context;
 
         public PasswordResetHistoryRepository(ClothingShopDbContext context)
         {
             _context = context;
+        }
+
+        public async Task AddAsync(PasswordResetHistory entity) => await _context.PasswordResetHistories.AddAsync(entity);
+
+        public async Task UpdateAsync(PasswordResetHistory entity) => _context.PasswordResetHistories.Update(entity);
+
+        public async Task<IEnumerable<PasswordResetHistory>> GetAllAsync() => await _context.PasswordResetHistories.ToListAsync();
+
+        public async Task<IEnumerable<PasswordResetHistory>> GetAllUsedOtpAsync(System.Linq.Expressions.Expression<Func<PasswordResetHistory, bool>> predicate)
+        {
+            return await _context.PasswordResetHistories.Where(predicate).ToListAsync();
         }
 
         public async Task<PasswordResetHistory?> GetLatestValidOtpAsync(Guid userId, string otp)
@@ -21,7 +32,7 @@ namespace ClothingShop.Infrastructure.Repositories
                 .Where(p => p.UserId == userId
                     && p.Otp == otp
                     && !p.IsUsed
-                    && p.IsExpried > DateTime.UtcNow
+                    && p.OtpExpiresAt > DateTime.UtcNow
                     && p.Status == AttemptStatus.Pending)
                 .OrderByDescending(p => p.OtpGeneratedAt)
                 .FirstOrDefaultAsync();

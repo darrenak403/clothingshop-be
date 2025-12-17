@@ -8,10 +8,10 @@ namespace ClothingShop.Domain.Entities
         public User User { get; set; } = null!;
         public string Otp { get; set; } = null!;
         public DateTime OtpGeneratedAt { get; set; }
-        public DateTime OtpExpriesdAt { get; set; }
+        public DateTime OtpExpiresAt { get; set; }
         public bool IsUsed { get; set; } = false;
         public DateTime UsedAt { get; set; }
-        public DateTime IsExpried { get; set; }
+        public DateTime IsExpired { get; set; }
         public int AttemptCount { get; set; } = 0;
         public AttemptStatus Status { get; set; } = AttemptStatus.Pending;
     }
