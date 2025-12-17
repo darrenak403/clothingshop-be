@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -39,16 +40,14 @@ namespace ClothingShop.Application.Services.Implementations
         {
             var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
             if (existingUser == null)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized");
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
 
-            var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, existingUser.PasswordHash);
+            var isPasswordValid = _passwordHasher.VerifyPassword(existingUser.PasswordHash, request.Password);
             if (!isPasswordValid)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized");
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
+
             var loginResponse = await GenerateAndSaveTokensAsync(existingUser);
-
-            return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Login successful");
-
-
+            return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Login successful", HttpStatusCode.OK);
         }
 
         private async Task<LoginResponse> GenerateAndSaveTokensAsync(User existingUser)
@@ -116,9 +115,12 @@ namespace ClothingShop.Application.Services.Implementations
         public async Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
             var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
-            var role = await _roleRepo.GetByNameAsync("Customer");
             if (existingUser != null)
-                return ApiResponse<RegisterResponse>.FailureResponse("Email is already registered.", "Conflict");
+                return ApiResponse<RegisterResponse>.FailureResponse("Email is already registered.", "Conflict", HttpStatusCode.Conflict);
+
+            var role = await _roleRepo.GetByNameAsync("Customer");
+            if (role == null)
+                return ApiResponse<RegisterResponse>.FailureResponse("Default role not found.", "Server error", HttpStatusCode.InternalServerError);
 
             var user = new User
             {
@@ -126,7 +128,7 @@ namespace ClothingShop.Application.Services.Implementations
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
-                RoleId = role!.Id
+                RoleId = role.Id
             };
 
             await _userRepo.AddAsync(user);
@@ -140,21 +142,21 @@ namespace ClothingShop.Application.Services.Implementations
                     FullName = user.FullName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    RoleName = role!.Name
+                    RoleName = role.Name
                 }
             };
 
-            return ApiResponse<RegisterResponse>.SuccessResponse(registerResponse);
+            return ApiResponse<RegisterResponse>.SuccessResponse(registerResponse, "Registered", HttpStatusCode.Created);
         }
 
         public async Task<ApiResponse<LoginResponse>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _userRepo.FindAsync(u => u.RefreshToken == refreshToken);
             if (user == null || user.RefreshTokenExpiry == null || user.RefreshTokenExpiry <= DateTime.UtcNow)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid or expired refresh token.", "Unauthorized");
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid or expired refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
 
             var result = await GenerateAndSaveTokensAsync(user);
-            return ApiResponse<LoginResponse>.SuccessResponse(result);
+            return ApiResponse<LoginResponse>.SuccessResponse(result, "Token refreshed", HttpStatusCode.OK);
         }
     }
 }
