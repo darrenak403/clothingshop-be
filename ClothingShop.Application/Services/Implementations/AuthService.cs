@@ -237,10 +237,6 @@ namespace ClothingShop.Application.Services.Implementations
             // Lưu thay đổi vào DB
             await _unitOfWork.SaveChangesAsync();
 
-            // ========================================================================
-            // KẾT THÚC SỬA LỖI
-            // ========================================================================
-
             // 3. Send OTP via email (Giữ nguyên logic cũ)
             var emailSubject = "Mã OTP Đặt Lại Mật Khẩu - ClothingShop";
             var emailBody = $@"
