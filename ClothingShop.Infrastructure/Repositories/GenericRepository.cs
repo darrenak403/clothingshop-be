@@ -24,7 +24,8 @@ namespace ClothingShop.Infrastructure.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
-        public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+        public async Task<T?> GetByIdAsync(Guid id) => await _dbSet.FindAsync(id);
+        
         public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
 
         public async Task UpdateAsync(T entity) => _dbSet.Update(entity);
