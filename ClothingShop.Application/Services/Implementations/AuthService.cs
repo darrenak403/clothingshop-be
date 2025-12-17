@@ -190,31 +190,64 @@ namespace ClothingShop.Application.Services.Implementations
             if (user == null)
                 return ApiResponse<string>.FailureResponse("Email not found.", "NotFound", HttpStatusCode.NotFound);
 
-            // Check rate limiting: Max 5 requests per day
+            // 1. Check rate limiting: Max 5 requests per day
             var todayCount = await _passwordResetHistoryRepo.GetTodayRequestCountAsync(user.Id);
             if (todayCount >= 5)
                 return ApiResponse<string>.FailureResponse("Quá nhiều yêu cầu. Vui lòng thử lại sau 24 giờ.", "TooManyRequests", HttpStatusCode.TooManyRequests);
 
-            // Mark all pending OTPs as expired
-            await _passwordResetHistoryRepo.MarkAllAsExpiredAsync(user.Id);
-
-            // Generate new OTP
+            // 2. Generate OTP settings
             var otp = GenerateOtp();
             var otpExpiryMinutes = int.Parse(_configuration["Auth:OtpExpiryMinutes"] ?? "15");
 
-            var resetHistory = new PasswordResetHistory
-            {
-                UserId = user.Id,
-                Otp = otp,
-                OtpGeneratedAt = DateTime.UtcNow,
-                OtpExpiresAt = DateTime.UtcNow.AddMinutes(otpExpiryMinutes),
-                Status = AttemptStatus.Pending
-            };
+            // ========================================================================
+            // BẮT ĐẦU SỬA LỖI DUPLICATE ENTRY TẠI ĐÂY
+            // ========================================================================
 
-            await _passwordResetHistoryRepo.AddAsync(resetHistory);
+            // Tìm xem user này đã có dòng nào trong bảng PasswordResetHistory chưa
+            // Lưu ý: Giả sử UserId là Khóa chính (PK) của bảng này
+            var existingHistory = await _passwordResetHistoryRepo.GetByIdAsync(user.Id);
+
+            PasswordResetHistory historyToEmail; // Biến tạm để dùng gửi email
+
+            if (existingHistory != null)
+            {
+                // A. UPDATE: Nếu đã có, cập nhật lại OTP mới
+                existingHistory.Otp = otp;
+                existingHistory.OtpGeneratedAt = DateTime.UtcNow;
+                existingHistory.OtpExpiresAt = DateTime.UtcNow.AddMinutes(otpExpiryMinutes);
+                existingHistory.Status = AttemptStatus.Pending;
+                existingHistory.IsUsed = false;
+                existingHistory.AttemptCount = 0; // Reset số lần thử sai
+
+                await _passwordResetHistoryRepo.UpdateAsync(existingHistory);
+                historyToEmail = existingHistory;
+            }
+            else
+            {
+                // B. INSERT: Nếu chưa có, tạo mới
+                var newHistory = new PasswordResetHistory
+                {
+                    UserId = user.Id,
+                    Otp = otp,
+                    OtpGeneratedAt = DateTime.UtcNow,
+                    OtpExpiresAt = DateTime.UtcNow.AddMinutes(otpExpiryMinutes),
+                    Status = AttemptStatus.Pending,
+                    IsUsed = false,
+                    AttemptCount = 0
+                };
+
+                await _passwordResetHistoryRepo.AddAsync(newHistory);
+                historyToEmail = newHistory;
+            }
+
+            // Lưu thay đổi vào DB
             await _unitOfWork.SaveChangesAsync();
 
-            // Send OTP via email
+            // ========================================================================
+            // KẾT THÚC SỬA LỖI
+            // ========================================================================
+
+            // 3. Send OTP via email (Giữ nguyên logic cũ)
             var emailSubject = "Mã OTP Đặt Lại Mật Khẩu - ClothingShop";
             var emailBody = $@"
                 <!DOCTYPE html>
@@ -260,8 +293,9 @@ namespace ClothingShop.Application.Services.Implementations
             }
             catch (Exception ex)
             {
-                resetHistory.Status = AttemptStatus.Failed;
-                await _passwordResetHistoryRepo.UpdateAsync(resetHistory);
+                // Nếu gửi mail lỗi, cập nhật trạng thái Failed
+                historyToEmail.Status = AttemptStatus.Failed;
+                await _passwordResetHistoryRepo.UpdateAsync(historyToEmail);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<string>.FailureResponse($"Không thể gửi email: {ex.Message}", "Email Error", HttpStatusCode.InternalServerError);

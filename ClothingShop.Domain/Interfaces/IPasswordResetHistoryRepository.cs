@@ -12,5 +12,6 @@ namespace ClothingShop.Domain.Interfaces
         Task<int> GetTodayRequestCountAsync(Guid userId); // int → Guid
         Task<List<PasswordResetHistory>> GetUserHistoryAsync(Guid userId, int pageSize = 50); // int → Guid
         Task MarkAllAsExpiredAsync(Guid userId); // int → Guid
+        Task<PasswordResetHistory?> GetByIdAsync(Guid id);
     }
 }

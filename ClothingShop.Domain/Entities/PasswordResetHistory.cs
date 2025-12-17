@@ -1,9 +1,13 @@
-﻿using ClothingShop.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using ClothingShop.Domain.Enums;
 
 namespace ClothingShop.Domain.Entities
 {
     public class PasswordResetHistory
     {
+        [Key]
+        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;
         public string Otp { get; set; } = null!;

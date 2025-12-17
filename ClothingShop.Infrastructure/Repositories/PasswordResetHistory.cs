@@ -68,5 +68,10 @@ namespace ClothingShop.Infrastructure.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<PasswordResetHistory?> GetByIdAsync(Guid id)
+        {
+            return await _context.PasswordResetHistories.FindAsync(id);
+        }
     }
 }
