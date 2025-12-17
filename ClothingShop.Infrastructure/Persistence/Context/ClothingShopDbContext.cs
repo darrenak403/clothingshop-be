@@ -15,6 +15,10 @@ namespace ClothingShop.Infrastructure.Persistence.Context
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
             // Seed Data cho Role (Admin, Staff, Customer)
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "Admin" },
@@ -24,4 +28,3 @@ namespace ClothingShop.Infrastructure.Persistence.Context
         }
     }
 }
- 

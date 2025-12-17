@@ -1,10 +1,12 @@
 ﻿using System.Text;
+using ClothingShop.Application.Interfaces;
 using ClothingShop.Application.Services.Implementations;
 using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Domain.Interfaces;
 using ClothingShop.Infrastructure.Persistence;
 using ClothingShop.Infrastructure.Persistence.Context;
 using ClothingShop.Infrastructure.Repositories;
+using ClothingShop.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -70,6 +72,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 builder.Services.AddControllers();
 

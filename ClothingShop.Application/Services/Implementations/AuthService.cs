@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using ClothingShop.Application.DTOs.Auth;
 using ClothingShop.Application.Interfaces;
@@ -8,23 +10,20 @@ using ClothingShop.Domain.Entities;
 using ClothingShop.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
-using ClothingShop.Infrastructure.Repositories;
 
 namespace ClothingShop.Application.Services.Implementations
 {
     public class AuthService : IAuthService
     {
         private readonly IGenericRepository<User> _userRepo;
-        private readonly RoleRepository _roleRepo;
+        private readonly IRoleRepository _roleRepo;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
 
         public AuthService(
             IGenericRepository<User> userRepo,
-            RoleRepository roleRepo,
+            IRoleRepository roleRepo,
             IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
             IConfiguration configuration)

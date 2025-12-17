@@ -4,28 +4,28 @@ namespace ClothingShop.Application.Wrapper
 {
     public class ApiResponse<T>
     {
-        public int status { get; set; }
+        public int Status { get; set; }
         public bool Success { get; set; }
         public string Message { get; set; }
         public T Data { get; set; }
         public string Errors { get; set; }
 
-        public static ApiResponse<T> SuccessResponse(T data, string message = "Success")
+        public static ApiResponse<T> SuccessResponse(T data, string message = "Success", HttpStatusCode status = HttpStatusCode.OK)
         {
             return new ApiResponse<T>
             {
-                status = (int)HttpStatusCode.OK,
+                Status = (int)status,
                 Success = true,
                 Message = message,
                 Data = data,
             };
         }
 
-        public static ApiResponse<T> FailureResponse(string errors, string message = "Failed")
+        public static ApiResponse<T> FailureResponse(string errors, string message = "Failed", HttpStatusCode status = HttpStatusCode.BadRequest)
         {
             return new ApiResponse<T>
             {
-                status = (int)HttpStatusCode.BadRequest,
+                Status = (int)status,
                 Success = false,
                 Message = message,
                 Errors = errors,

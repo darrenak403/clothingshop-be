@@ -17,7 +17,7 @@ namespace ClothingShop.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -58,21 +58,21 @@ namespace ClothingShop.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 12, 15, 9, 28, 32, 609, DateTimeKind.Utc).AddTicks(1316),
+                            CreatedAt = new DateTime(2025, 12, 17, 5, 57, 24, 422, DateTimeKind.Utc).AddTicks(7345),
                             IsDeleted = false,
                             Name = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 12, 15, 9, 28, 32, 609, DateTimeKind.Utc).AddTicks(1322),
+                            CreatedAt = new DateTime(2025, 12, 17, 5, 57, 24, 422, DateTimeKind.Utc).AddTicks(7743),
                             IsDeleted = false,
                             Name = "Staff"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 12, 15, 9, 28, 32, 609, DateTimeKind.Utc).AddTicks(1323),
+                            CreatedAt = new DateTime(2025, 12, 17, 5, 57, 24, 422, DateTimeKind.Utc).AddTicks(7744),
                             IsDeleted = false,
                             Name = "Customer"
                         });
@@ -80,11 +80,9 @@ namespace ClothingShop.Infrastructure.Migrations
 
             modelBuilder.Entity("ClothingShop.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -116,6 +114,12 @@ namespace ClothingShop.Infrastructure.Migrations
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");

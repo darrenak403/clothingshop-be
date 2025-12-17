@@ -13,7 +13,7 @@ namespace ClothingShop.Infrastructure.Persistence
 
             // 2. Check xem đã có User Admin nào chưa
             // (Dựa vào RoleId = 1 là Admin, hoặc Email)
-            if (context.Users.Any(u => u.Email == "admin@clothingshop.com"))
+            if (context.Users.Any(u => u.Email == "admin@admin.com"))
             {
                 return; // Đã có rồi thì thôi, không làm gì cả
             }
@@ -21,6 +21,7 @@ namespace ClothingShop.Infrastructure.Persistence
             // 3. Nếu chưa có, tạo mới User Admin
             var adminUser = new User
             {
+                Id = Guid.NewGuid(),
                 FullName = "Administrator",
                 Email = "admin@admin.com",
                 PhoneNumber = "0799995828",
