@@ -9,5 +9,9 @@
 
         public int RoleId { get; set; }
         public Role Role { get; set; } = null!;
+
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
+
     }
 }

@@ -1,29 +1,161 @@
-﻿using ClothingShop.Application.DTOs.Auth;
+﻿using System.Security.Claims;
+using System.Text;
+using ClothingShop.Application.DTOs.Auth;
+using ClothingShop.Application.Interfaces;
 using ClothingShop.Application.Services.Interfaces;
+using ClothingShop.Application.Wrapper;
+using ClothingShop.Domain.Entities;
 using ClothingShop.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using ClothingShop.Infrastructure.Repositories;
 
 namespace ClothingShop.Application.Services.Implementations
 {
     public class AuthService : IAuthService
     {
-        public readonly IUnitOfWork _unitOfWork;
-        public readonly IConfiguration _configuration;
+        private readonly IGenericRepository<User> _userRepo;
+        private readonly RoleRepository _roleRepo;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(IUnitOfWork unitOfWork, IConfiguration configuration)
+        public AuthService(
+            IGenericRepository<User> userRepo,
+            RoleRepository roleRepo,
+            IPasswordHasher passwordHasher,
+            IUnitOfWork unitOfWork,
+            IConfiguration configuration)
         {
+            _userRepo = userRepo;
+            _roleRepo = roleRepo;
+            _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
         }
 
-        public Task<string> LoginAsync(LoginDto request)
+        public async Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request)
         {
-            throw new NotImplementedException();
+            var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
+            if (existingUser == null)
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized");
+
+            var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, existingUser.PasswordHash);
+            if (!isPasswordValid)
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized");
+            var loginResponse = await GenerateAndSaveTokensAsync(existingUser);
+
+            return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Login successful");
+
+
         }
 
-        public Task<string> RegisterAsync(RegisterDto request)
+        private async Task<LoginResponse> GenerateAndSaveTokensAsync(User existingUser)
         {
-            throw new NotImplementedException();
+            var role = await _roleRepo.GetByIdAsync(existingUser.RoleId);
+            var accessToken = GenerateJwtToken(existingUser, role!.Name);
+            var refreshToken = GenerateRefreshToken();
+
+            existingUser.RefreshToken = refreshToken;
+            existingUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+            await _userRepo.UpdateAsync(existingUser);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new LoginResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                User = new UserDto
+                {
+                    Id = existingUser.Id,
+                    FullName = existingUser.FullName,
+                    Email = existingUser.Email,
+                    PhoneNumber = existingUser.PhoneNumber,
+                    RoleName = role!.Name
+                }
+            };
+        }
+
+        private string GenerateJwtToken(User user, string roleName)
+        {
+            var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.");
+            var issuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer is not configured.");
+            var audience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT Audience is not configured.");
+            var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Role, roleName)
+            };
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+
+        public async Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
+        {
+            var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
+            var role = await _roleRepo.GetByNameAsync("Customer");
+            if (existingUser != null)
+                return ApiResponse<RegisterResponse>.FailureResponse("Email is already registered.", "Conflict");
+
+            var user = new User
+            {
+                FullName = request.FullName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = _passwordHasher.HashPassword(request.Password),
+                RoleId = role!.Id
+            };
+
+            await _userRepo.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            var registerResponse = new RegisterResponse
+            {
+                User = new UserDto
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    RoleName = role!.Name
+                }
+            };
+
+            return ApiResponse<RegisterResponse>.SuccessResponse(registerResponse);
+        }
+
+        public async Task<ApiResponse<LoginResponse>> RefreshTokenAsync(string refreshToken)
+        {
+            var user = await _userRepo.FindAsync(u => u.RefreshToken == refreshToken);
+            if (user == null || user.RefreshTokenExpiry == null || user.RefreshTokenExpiry <= DateTime.UtcNow)
+                return ApiResponse<LoginResponse>.FailureResponse("Invalid or expired refresh token.", "Unauthorized");
+
+            var result = await GenerateAndSaveTokensAsync(user);
+            return ApiResponse<LoginResponse>.SuccessResponse(result);
         }
     }
 }
