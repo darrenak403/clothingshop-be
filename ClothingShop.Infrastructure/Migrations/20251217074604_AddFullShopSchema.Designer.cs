@@ -4,6 +4,7 @@ using ClothingShop.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClothingShop.Infrastructure.Migrations
 {
     [DbContext(typeof(ClothingShopDbContext))]
-    partial class ClothingShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217074604_AddFullShopSchema")]
+    partial class AddFullShopSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
