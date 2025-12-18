@@ -1,4 +1,4 @@
-﻿namespace ClothingShop.Application.Services.Interfaces
+﻿namespace ClothingShop.Infrastructure.Interfaces
 {
     public interface IEmailService
     {

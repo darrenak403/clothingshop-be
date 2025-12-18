@@ -1,4 +1,4 @@
-﻿using ClothingShop.Application.Services.Interfaces;
+﻿using ClothingShop.Infrastructure.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;

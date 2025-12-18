@@ -4,17 +4,17 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using ClothingShop.Application.DTOs.Auth;
-using ClothingShop.Application.Interfaces;
+using ClothingShop.Application.DTOs.User;
 using ClothingShop.Application.Services.Auth.Interfaces;
-using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Domain.Entities;
 using ClothingShop.Domain.Enums;
 using ClothingShop.Domain.Interfaces;
+using ClothingShop.Infrastructure.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ClothingShop.Application.Services.Auth.Implementations
+namespace ClothingShop.Application.Services.Auth.Impl
 {
     public class AuthService : IAuthService
     {

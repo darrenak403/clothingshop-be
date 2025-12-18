@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using ClothingShop.Application.Interfaces;
-using ClothingShop.Application.Services.Auth.Implementations;
+using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
-using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Domain.Interfaces;
+using ClothingShop.Infrastructure.Interfaces;
 using ClothingShop.Infrastructure.Persistence;
 using ClothingShop.Infrastructure.Persistence.Context;
 using ClothingShop.Infrastructure.Repositories;

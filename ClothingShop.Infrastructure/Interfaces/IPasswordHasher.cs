@@ -1,4 +1,4 @@
-﻿namespace ClothingShop.Application.Interfaces
+﻿namespace ClothingShop.Infrastructure.Interfaces
 {
     public interface IPasswordHasher
     {

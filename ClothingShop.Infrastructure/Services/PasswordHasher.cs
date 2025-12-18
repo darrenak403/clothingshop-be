@@ -1,4 +1,4 @@
-﻿using ClothingShop.Application.Interfaces;
+﻿using ClothingShop.Infrastructure.Interfaces;
 
 namespace ClothingShop.Infrastructure.Services
 {
