@@ -18,35 +18,28 @@ namespace ClothingShop.Application.Services.Auth.Impl
 {
     public class AuthService : IAuthService
     {
-        private readonly IGenericRepository<User> _userRepo;
-        private readonly IRoleRepository _roleRepo;
-        private readonly IPasswordHasher _passwordHasher;
+        // CHỈ CẦN INJECT IUnitOfWork - Không cần inject từng repository riêng lẻ nữa
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHasher _passwordHasher;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        private readonly IPasswordResetHistoryRepository _passwordResetHistoryRepo;
 
         public AuthService(
-            IGenericRepository<User> userRepo,
-            IRoleRepository roleRepo,
-            IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
+            IPasswordHasher passwordHasher,
             IConfiguration configuration,
-            IEmailService emailService,
-            IPasswordResetHistoryRepository passwordResetHistoryRepo)
+            IEmailService emailService)
         {
-            _userRepo = userRepo;
-            _roleRepo = roleRepo;
-            _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
+            _passwordHasher = passwordHasher;
             _configuration = configuration;
             _emailService = emailService;
-            _passwordResetHistoryRepo = passwordResetHistoryRepo;
         }
 
         public async Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request)
         {
-            var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
+            // Gọi repository thông qua _unitOfWork
+            var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser == null)
                 return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
 
@@ -63,14 +56,17 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         private async Task<LoginResponse> GenerateAndSaveTokensAsync(User existingUser)
         {
-            var role = await _roleRepo.GetByIdAsync(existingUser.RoleId);
+            // Lấy role thông qua _unitOfWork.Roles
+            var role = await _unitOfWork.Roles.GetByIdAsync(existingUser.RoleId);
             var accessToken = GenerateJwtToken(existingUser, role!.Name);
             var refreshToken = GenerateRefreshToken();
 
             existingUser.RefreshToken = refreshToken;
             existingUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-            await _userRepo.UpdateAsync(existingUser);
+            // Cập nhật user thông qua _unitOfWork.Users
+            await _unitOfWork.Users.UpdateAsync(existingUser);
+            // Lưu tất cả thay đổi vào DB trong 1 transaction
             await _unitOfWork.SaveChangesAsync();
 
             return new LoginResponse
@@ -125,11 +121,11 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request)
         {
-            var existingUser = await _userRepo.FindAsync(u => u.Email == request.Email);
+            var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser != null)
                 return ApiResponse<RegisterResponse>.FailureResponse("Email is already registered.", "Conflict", HttpStatusCode.Conflict);
 
-            var role = await _roleRepo.GetByNameAsync("Customer");
+            var role = await _unitOfWork.Roles.GetByNameAsync("Customer");
             if (role == null)
                 return ApiResponse<RegisterResponse>.FailureResponse("Default role not found.", "Server error", HttpStatusCode.InternalServerError);
 
@@ -142,7 +138,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                 RoleId = role.Id
             };
 
-            await _userRepo.AddAsync(user);
+            await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
             var registerResponse = new RegisterResponse
@@ -162,7 +158,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<LoginResponse>> RefreshTokenAsync(string refreshToken)
         {
-            var user = await _userRepo.FindAsync(u => u.RefreshToken == refreshToken);
+            var user = await _unitOfWork.Users.FindAsync(u => u.RefreshToken == refreshToken);
             if (user == null || user.RefreshTokenExpiry == null || user.RefreshTokenExpiry <= DateTime.UtcNow)
                 return ApiResponse<LoginResponse>.FailureResponse("Invalid or expired refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
 
@@ -172,13 +168,13 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<string>> LogoutAsync(string refreshToken)
         {
-            var user = await _userRepo.FindAsync(u => u.RefreshToken == refreshToken);
+            var user = await _unitOfWork.Users.FindAsync(u => u.RefreshToken == refreshToken);
             if (user == null)
                 return ApiResponse<string>.FailureResponse("Invalid refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
 
             user.RefreshToken = null;
             user.RefreshTokenExpiry = null;
-            await _userRepo.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
             return ApiResponse<string>.SuccessResponse(string.Empty, "Logged out successfully", HttpStatusCode.OK);
@@ -186,12 +182,12 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            var user = await _userRepo.FindAsync(u => u.Email == request.Email);
+            var user = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (user == null)
                 return ApiResponse<string>.FailureResponse("Email not found.", "NotFound", HttpStatusCode.NotFound);
 
             // 1. Check rate limiting: Max 5 requests per day
-            var todayCount = await _passwordResetHistoryRepo.GetTodayRequestCountAsync(user.Id);
+            var todayCount = await _unitOfWork.PasswordResets.GetTodayRequestCountAsync(user.Id);
             if (todayCount >= 5)
                 return ApiResponse<string>.FailureResponse("Quá nhiều yêu cầu. Vui lòng thử lại sau 24 giờ.", "TooManyRequests", HttpStatusCode.TooManyRequests);
 
@@ -199,7 +195,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
             var otp = GenerateOtp();
             var otpExpiryMinutes = int.Parse(_configuration["Auth:OtpExpiryMinutes"] ?? "5");
 
-            var existingHistory = await _passwordResetHistoryRepo.GetByIdAsync(user.Id);
+            var existingHistory = await _unitOfWork.PasswordResets.GetByIdAsync(user.Id);
 
             PasswordResetHistory historyToEmail; // Biến tạm để dùng gửi email
 
@@ -213,7 +209,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                 existingHistory.IsUsed = false;
                 existingHistory.AttemptCount = 0; // Reset số lần thử sai
 
-                await _passwordResetHistoryRepo.UpdateAsync(existingHistory);
+                await _unitOfWork.PasswordResets.UpdateAsync(existingHistory);
                 historyToEmail = existingHistory;
             }
             else
@@ -230,7 +226,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                     AttemptCount = 0
                 };
 
-                await _passwordResetHistoryRepo.AddAsync(newHistory);
+                await _unitOfWork.PasswordResets.AddAsync(newHistory);
                 historyToEmail = newHistory;
             }
 
@@ -285,7 +281,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
             {
                 // Nếu gửi mail lỗi, cập nhật trạng thái Failed
                 historyToEmail.Status = AttemptStatus.Failed;
-                await _passwordResetHistoryRepo.UpdateAsync(historyToEmail);
+                await _unitOfWork.PasswordResets.UpdateAsync(historyToEmail);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponse<string>.FailureResponse($"Không thể gửi email: {ex.Message}", "Email Error", HttpStatusCode.InternalServerError);
@@ -294,17 +290,17 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var user = await _userRepo.FindAsync(u => u.Email == request.Email);
+            var user = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (user == null)
                 return ApiResponse<string>.FailureResponse("Email not found.", "NotFound", HttpStatusCode.NotFound);
 
             // Get latest valid OTP
-            var resetHistory = await _passwordResetHistoryRepo.GetLatestValidOtpAsync(user.Id, request.Otp);
+            var resetHistory = await _unitOfWork.PasswordResets.GetLatestValidOtpAsync(user.Id, request.Otp);
 
             if (resetHistory == null)
             {
                 // Log failed attempt
-                var allPending = await _passwordResetHistoryRepo
+                var allPending = await _unitOfWork.PasswordResets
                     .GetAllUsedOtpAsync(p => p.UserId == user.Id && p.Otp == request.Otp && !p.IsUsed);
 
                 if (allPending.Any())
@@ -317,7 +313,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                         latest.Status = AttemptStatus.Failed;
                     }
 
-                    await _passwordResetHistoryRepo.UpdateAsync(latest);
+                    await _unitOfWork.PasswordResets.UpdateAsync(latest);
                     await _unitOfWork.SaveChangesAsync();
                 }
 
@@ -334,8 +330,9 @@ namespace ClothingShop.Application.Services.Auth.Impl
             resetHistory.UsedAt = DateTime.UtcNow;
             resetHistory.Status = AttemptStatus.Used;
 
-            await _userRepo.UpdateAsync(user);
-            await _passwordResetHistoryRepo.UpdateAsync(resetHistory);
+            // Cập nhật cả user và password reset history trong cùng 1 transaction
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.PasswordResets.UpdateAsync(resetHistory);
             await _unitOfWork.SaveChangesAsync();
 
             return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được đặt lại thành công", HttpStatusCode.OK);
@@ -343,7 +340,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
         {
-            var user = await _userRepo.GetByIdAsync(userId);
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
                 return ApiResponse<string>.FailureResponse("User not found.", "NotFound", HttpStatusCode.NotFound);
 
@@ -355,7 +352,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
             user.RefreshToken = null;
             user.RefreshTokenExpiry = null;
 
-            await _userRepo.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
             return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được thay đổi thành công", HttpStatusCode.OK);

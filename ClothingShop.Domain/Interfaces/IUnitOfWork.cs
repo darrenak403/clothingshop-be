@@ -1,10 +1,27 @@
-﻿namespace ClothingShop.Domain.Interfaces
+﻿using ClothingShop.Domain.Entities;
+
+namespace ClothingShop.Domain.Interfaces
 {
+    /// <summary>
+    /// Unit of Work Pattern - Quản lý tất cả repositories và đảm bảo tính nhất quán của giao dịch
+    /// Thay vì inject từng repository riêng lẻ, chỉ cần inject IUnitOfWork
+    /// </summary>
     public interface IUnitOfWork : IDisposable
     {
-        IUserRepository Users { get; }
+        // Repository cho các entity chính
+        IGenericRepository<User> Users { get; }
         IRoleRepository Roles { get; }
+        IPasswordResetHistoryRepository PasswordResets { get; }
 
+        // Có thể thêm các repository khác khi cần
+        // IGenericRepository<Product> Products { get; }
+        // IGenericRepository<Order> Orders { get; }
+        // IGenericRepository<Cart> Carts { get; }
+
+        /// <summary>
+        /// Lưu tất cả thay đổi vào database trong một transaction duy nhất
+        /// Đảm bảo "Tất cả cùng thành công" hoặc "Tất cả cùng rollback"
+        /// </summary>
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
