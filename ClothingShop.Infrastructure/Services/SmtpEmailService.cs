@@ -38,7 +38,6 @@ namespace ClothingShop.Infrastructure.Services
                 var host = _configuration["Smtp:Host"];
                 var port = int.Parse(_configuration["Smtp:Port"] ?? "587");
 
-                // Gmail requires StartTls
                 await client.ConnectAsync(host, port, SecureSocketOptions.StartTls);
 
                 var username = _configuration["Smtp:Username"];
@@ -59,6 +58,27 @@ namespace ClothingShop.Infrastructure.Services
                 _logger.LogError(ex, "Failed to send email to {ToEmail}. Error: {ErrorMessage}", toEmail, ex.Message);
                 throw new InvalidOperationException($"Failed to send email: {ex.Message}", ex);
             }
+        }
+
+        public async Task SendOtpEmailAsync(string toEmail, string fullName, string otp, int expiryMinutes)
+        {
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates", "Email", "OtpTemplate.html");
+
+            if (!File.Exists(filePath))
+            {
+                _logger.LogError("Email template not found at: {FilePath}", filePath);
+                throw new FileNotFoundException("Không tìm thấy file template email tại: " + filePath);
+            }
+
+            var template = await File.ReadAllTextAsync(filePath);
+
+            var emailBody = template
+                .Replace("{{FullName}}", fullName)
+                .Replace("{{Otp}}", otp)
+                .Replace("{{Expiry}}", expiryMinutes.ToString());
+
+
+            await SendEmailAsync(toEmail, "Mã OTP Xác Minh - DARREN SHOP", emailBody);
         }
     }
 }

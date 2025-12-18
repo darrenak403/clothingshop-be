@@ -1,4 +1,5 @@
 ﻿using ClothingShop.Application.DTOs.User;
+using ClothingShop.Application.Wrapper;
 
 namespace ClothingShop.Application.Services.UserProfile.Interfaces
 {

@@ -7,6 +7,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Templates\Email\OtpTemplate.html" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Templates\Email\OtpTemplate.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 		<PackageReference Include="MailKit" Version="4.14.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">

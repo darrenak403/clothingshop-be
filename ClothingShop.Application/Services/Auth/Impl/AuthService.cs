@@ -18,7 +18,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
 {
     public class AuthService : IAuthService
     {
-        // CHỈ CẦN INJECT IUnitOfWork - Không cần inject từng repository riêng lẻ nữa
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IConfiguration _configuration;
@@ -38,7 +37,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request)
         {
-            // Gọi repository thông qua _unitOfWork
             var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser == null)
                 return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
@@ -56,7 +54,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         private async Task<LoginResponse> GenerateAndSaveTokensAsync(User existingUser)
         {
-            // Lấy role thông qua _unitOfWork.Roles
             var role = await _unitOfWork.Roles.GetByIdAsync(existingUser.RoleId);
             var accessToken = GenerateJwtToken(existingUser, role!.Name);
             var refreshToken = GenerateRefreshToken();
@@ -64,7 +61,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
             existingUser.RefreshToken = refreshToken;
             existingUser.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-            // Cập nhật user thông qua _unitOfWork.Users
             await _unitOfWork.Users.UpdateAsync(existingUser);
             // Lưu tất cả thay đổi vào DB trong 1 transaction
             await _unitOfWork.SaveChangesAsync();
@@ -201,7 +197,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
             if (existingHistory != null)
             {
-                // A. UPDATE: Nếu đã có, cập nhật lại OTP mới
                 existingHistory.Otp = otp;
                 existingHistory.OtpGeneratedAt = DateTime.UtcNow;
                 existingHistory.OtpExpiresAt = DateTime.UtcNow.AddMinutes(otpExpiryMinutes);
@@ -214,7 +209,6 @@ namespace ClothingShop.Application.Services.Auth.Impl
             }
             else
             {
-                // B. INSERT: Nếu chưa có, tạo mới  
                 var newHistory = new PasswordResetHistory
                 {
                     UserId = user.Id,
@@ -230,51 +224,11 @@ namespace ClothingShop.Application.Services.Auth.Impl
                 historyToEmail = newHistory;
             }
 
-            // Lưu thay đổi vào DB
             await _unitOfWork.SaveChangesAsync();
-
-            // 3. Send OTP via email (Giữ nguyên logic cũ)
-            var emailSubject = "Mã OTP Đặt Lại Mật Khẩu - ClothingShop";
-            var emailBody = $@"
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                        .header {{ background-color: #2196F3; color: white; padding: 20px; text-align: center; }}
-                        .content {{ background-color: #f9f9f9; padding: 30px; border-radius: 5px; margin-top: 20px; }}
-                        .otp-code {{ background-color: #fff; border: 2px dashed #2196F3; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; color: #2196F3; letter-spacing: 5px; margin: 20px 0; }}
-                        .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
-                        .warning {{ color: #f44336; font-weight: bold; }}
-                    </style>
-                </head>
-                <body>
-                    <div class='container'>
-                        <div class='header'>
-                            <h1>ClothingShop</h1>
-                        </div>
-                        <div class='content'>
-                            <h2>Xin chào {user.FullName},</h2>
-                            <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình.</p>
-                            <p>Mã OTP của bạn là:</p>
-                            <div class='otp-code'>{otp}</div>
-                            <p><strong>Mã này có hiệu lực trong {otpExpiryMinutes} phút.</strong></p>
-                            <p class='warning'>⚠️ Không chia sẻ mã này với bất kỳ ai!</p>
-                            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi ngay.</p>
-                        </div>
-                        <div class='footer'>
-                            <p>© 2025 ClothingShop. All rights reserved.</p>
-                            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            ";
 
             try
             {
-                await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+                await _emailService.SendOtpEmailAsync(user.Email, user.FullName, otp, otpExpiryMinutes);
                 return ApiResponse<string>.SuccessResponse(string.Empty, "OTP đã được gửi đến email của bạn", HttpStatusCode.OK);
             }
             catch (Exception ex)
