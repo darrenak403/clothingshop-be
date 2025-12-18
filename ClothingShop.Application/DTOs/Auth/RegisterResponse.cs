@@ -4,5 +4,5 @@ namespace ClothingShop.Application.DTOs.Auth;
 
 public class RegisterResponse
 {
-    public UserDto User { get; set; } = null!;
+    public UserAuthDto User { get; set; } = null!;
 }

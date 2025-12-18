@@ -4,8 +4,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using ClothingShop.Application.DTOs.Auth;
-using ClothingShop.Application.DTOs.User;
 using ClothingShop.Application.Interfaces;
+using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Application.Services.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Domain.Entities;
@@ -14,7 +14,7 @@ using ClothingShop.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ClothingShop.Application.Services.Implementations
+namespace ClothingShop.Application.Services.Auth.Implementations
 {
     public class AuthService : IAuthService
     {
@@ -77,7 +77,7 @@ namespace ClothingShop.Application.Services.Implementations
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                User = new UserDto
+                User = new UserAuthDto
                 {
                     UserId = existingUser.Id,
                     FullName = existingUser.FullName,
@@ -147,7 +147,7 @@ namespace ClothingShop.Application.Services.Implementations
 
             var registerResponse = new RegisterResponse
             {
-                User = new UserDto
+                User = new UserAuthDto
                 {
                     UserId = user.Id,
                     FullName = user.FullName,

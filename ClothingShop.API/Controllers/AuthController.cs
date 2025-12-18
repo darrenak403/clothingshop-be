@@ -1,5 +1,5 @@
 ﻿using ClothingShop.Application.DTOs.Auth;
-using ClothingShop.Application.Services.Interfaces;
+using ClothingShop.Application.Services.Auth.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClothingShop.API.Controllers

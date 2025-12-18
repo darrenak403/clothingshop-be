@@ -1,7 +1,7 @@
 ﻿using ClothingShop.Application.DTOs.Auth;
 using ClothingShop.Application.Wrapper;
 
-namespace ClothingShop.Application.Services.Interfaces
+namespace ClothingShop.Application.Services.Auth.Interfaces
 {
     public interface IAuthService
     {
