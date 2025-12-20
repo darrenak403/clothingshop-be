@@ -2,7 +2,7 @@
 {
     public class AddressDto
     {
-        public Guid Id { get; set; }
+        public Guid AddressId { get; set; }
         public string RecipientName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string Street { get; set; } = null!;

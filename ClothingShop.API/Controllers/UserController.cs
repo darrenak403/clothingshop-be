@@ -1,5 +1,5 @@
 ﻿using ClothingShop.Application.DTOs.User;
-using ClothingShop.Application.Services.Address.Interfaces;
+using ClothingShop.Application.Services.AddressService.Interfaces;
 using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Application.Services.UserProfile.Interfaces;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using ClothingShop.Application.Services.Address.Impl;
-using ClothingShop.Application.Services.Address.Interfaces;
+using ClothingShop.Application.Services.AddressService.Impl;
+using ClothingShop.Application.Services.AddressService.Interfaces;
 using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Application.Services.UserProfile.Impl;
@@ -79,8 +79,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPasswordResetHistoryRepository, PasswordResetHistoryRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+builder.Services.AddScoped<IPasswordResetHistoryRepository, PasswordResetHistoryRepository>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // --- CÁC SERVICE MỚI CẦN BỔ SUNG (BẮT BUỘC) ---
