@@ -43,6 +43,13 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
+        [HttpPost("avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            var result = await _userService.UpdateAvatarProfileAsync(CurrentUserId, file);
+            return StatusCode(result.Status, result);
+        }
+
         //--- ADMIN ---
         // GET: api/users
         [HttpGet]

@@ -3,15 +3,18 @@ using ClothingShop.Application.DTOs.User;
 using ClothingShop.Application.Services.UserProfile.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace ClothingShop.Application.Services.UserProfile.Impl
 {
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IUnitOfWork unitOfWork)
+        private readonly IPhotoService _photoService;
+        public UserService(IUnitOfWork unitOfWork, IPhotoService photoService)
         {
             _unitOfWork = unitOfWork;
+            _photoService = photoService;
         }
 
         // --- MEMBER ---
@@ -58,20 +61,14 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
                 user.PhoneNumber = request.PhoneNumber;
             }
 
-            // 3. AvatarUrl
-            if (request.AvatarUrl != null)
-            {
-                user.AvatarUrl = request.AvatarUrl;
-            }
-
-            // 4. DateOfBirth (Kiểu DateTime?)
+            // 3. DateOfBirth (Kiểu DateTime?)
             // Chỉ update nếu có giá trị
             if (request.DateOfBirth.HasValue)
             {
                 user.DateOfBirth = request.DateOfBirth.Value;
             }
 
-            // 5. Gender
+            // 4. Gender
             if (!string.IsNullOrEmpty(request.Gender))
             {
                 user.Gender = request.Gender;
@@ -85,11 +82,35 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
             return ApiResponse<bool>.SuccessResponse(true, "Cập nhật hồ sơ thành công");
         }
 
+
+        public async Task<ApiResponse<bool>> UpdateAvatarProfileAsync(Guid userId, IFormFile file)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+
+            var result = await _photoService.AddPhotoAsync(file);
+
+            if (result.Error != null)
+                return ApiResponse<bool>.FailureResponse("Lỗi khi tải ảnh lên Cloudinary: " + result.Error.Message, "UploadError", HttpStatusCode.InternalServerError);
+
+            // 3. (Tùy chọn) Xóa ảnh cũ trên Cloudinary nếu cần thiết
+            // if (!string.IsNullOrEmpty(user.AvatarUrl)) { ... logic xóa ... }
+
+            // 4. Lưu URL mới vào Database
+            user.AvatarUrl = result.SecureUrl.AbsoluteUri;
+
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            // 5. Trả về URL mới để Frontend hiển thị
+            return ApiResponse<bool>.SuccessResponse(true, "Cập nhật ảnh đại diện thành công");
+        }
+
         // --- ADMIN ---
         public async Task<ApiResponse<PagedResult<UserDto>>> GetAllUsersAsync(UserFilterRequest query)
         {
             // Gọi Repository để lấy dữ liệu phân trang và filter
-            // Lưu ý: Hàm GetPagedUsersAsync cần được implement trong UserRepository (như đã bàn ở các bước trước)
             var (users, totalCount) = await _unitOfWork.Users.GetPagedUsersAsync(
                 query.Keyword,
                 query.IsActive,
@@ -184,6 +205,5 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
             var action = isActive ? "Mở khóa" : "Khóa";
             return ApiResponse<bool>.SuccessResponse(true, $"{action} tài khoản thành công");
         }
-
     }
 }
