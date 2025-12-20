@@ -1,4 +1,4 @@
-# 👔 ClothingShop - E-commerce Platform (.NET 8 Clean Architecture)
+# ClothingShop - E-commerce Platform
 
 > **Dự án:** Hệ thống bán quần áo E-commerce  
 > **Kiến trúc:** Clean Architecture (Onion Architecture)  
