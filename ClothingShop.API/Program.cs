@@ -1,6 +1,10 @@
 ﻿using System.Text;
+using ClothingShop.Application.Services.Address.Impl;
+using ClothingShop.Application.Services.Address.Interfaces;
 using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
+using ClothingShop.Application.Services.UserProfile.Impl;
+using ClothingShop.Application.Services.UserProfile.Interfaces;
 using ClothingShop.Infrastructure.Interfaces;
 using ClothingShop.Infrastructure.Persistence;
 using ClothingShop.Infrastructure.Persistence.Context;
@@ -48,11 +52,12 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Nhập token: Bearer {token}",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Description = "Nhập JWT Token của bạn vào đây (không cần gõ chữ Bearer)"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -75,7 +80,14 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetHistoryRepository, PasswordResetHistoryRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+// --- CÁC SERVICE MỚI CẦN BỔ SUNG (BẮT BUỘC) ---
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 builder.Services.AddControllers();
 

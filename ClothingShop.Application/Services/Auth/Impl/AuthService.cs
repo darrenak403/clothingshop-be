@@ -295,7 +295,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<string>.FailureResponse("User not found.", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<string>.FailureResponse("Không tìm thấy người dùng.", "NotFound", HttpStatusCode.NotFound);
 
             var isValidPassword = _passwordHasher.VerifyPassword(user.PasswordHash, request.CurrentPassword);
             if (!isValidPassword)

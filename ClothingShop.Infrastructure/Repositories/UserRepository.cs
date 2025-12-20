@@ -14,7 +14,10 @@ namespace ClothingShop.Infrastructure.Repositories
         public async Task<(IEnumerable<User> Items, int TotalCount)> GetPagedUsersAsync(string? keyword, bool? isActive, int pageNumber, int pageSize)
         {
             // 1. Khởi tạo Queryable (chưa chạy xuống DB)
-            var query = _context.Users.AsQueryable();
+            var query = _context.Users
+                 .Include(u => u.Role)
+                 .Include(u => u.Orders)
+                 .AsQueryable();
 
             // 2. Lọc theo từ khóa (Tên hoặc Email)
             if (!string.IsNullOrEmpty(keyword))

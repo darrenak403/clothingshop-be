@@ -23,7 +23,7 @@ namespace ClothingShop.API.Controllers
             var response = await _authService.RegisterAsync(request);
             if (!response.Success)
                 return BadRequest(response);
-            return Ok(response);
+            return StatusCode(response.Status, response);
         }
 
         [HttpPost("login")]

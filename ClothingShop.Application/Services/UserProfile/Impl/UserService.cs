@@ -19,7 +19,7 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<UserProfileDto>.FailureResponse("User not found", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<UserProfileDto>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
 
             var role = await _unitOfWork.Roles.GetByIdAsync(user.RoleId);
 
@@ -42,19 +42,47 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<bool>.FailureResponse("User not found", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
 
-            user.FullName = request.FullName;
-            user.PhoneNumber = request.PhoneNumber;
-            user.AvatarUrl = request.AvatarUrl;
-            user.DateOfBirth = request.DateOfBirth;
-            user.Gender = request.Gender;
+
+            // 1. FullName: Nếu request có gửi chuỗi (không rỗng/null) thì mới update
+            if (!string.IsNullOrEmpty(request.FullName))
+            {
+                user.FullName = request.FullName;
+            }
+
+            // 2. PhoneNumber: Nếu request khác null thì update
+            // Lưu ý: Nếu user muốn xóa SĐT, FE cần gửi chuỗi rỗng "" (tùy quy ước của bạn)
+            if (request.PhoneNumber != null)
+            {
+                user.PhoneNumber = request.PhoneNumber;
+            }
+
+            // 3. AvatarUrl
+            if (request.AvatarUrl != null)
+            {
+                user.AvatarUrl = request.AvatarUrl;
+            }
+
+            // 4. DateOfBirth (Kiểu DateTime?)
+            // Chỉ update nếu có giá trị
+            if (request.DateOfBirth.HasValue)
+            {
+                user.DateOfBirth = request.DateOfBirth.Value;
+            }
+
+            // 5. Gender
+            if (!string.IsNullOrEmpty(request.Gender))
+            {
+                user.Gender = request.Gender;
+            }
+
             user.LastModifiedAt = DateTime.UtcNow;
 
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<bool>.SuccessResponse(true, "Cập nhật thông tin thành công", HttpStatusCode.OK);
+            return ApiResponse<bool>.SuccessResponse(true, "Cập nhật hồ sơ thành công");
         }
 
         // --- ADMIN ---
@@ -100,7 +128,7 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<UserDto>.FailureResponse("User not found", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<UserDto>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
 
             var role = await _unitOfWork.Roles.GetByIdAsync(user.RoleId);
 
@@ -132,7 +160,10 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<bool>.FailureResponse("User not found", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+
+            if (user.IsActive == isActive)
+                return ApiResponse<bool>.FailureResponse("Trạng thái tài khoản không thay đổi", "BadRequest", HttpStatusCode.BadRequest);
 
             user.IsActive = isActive;
 
