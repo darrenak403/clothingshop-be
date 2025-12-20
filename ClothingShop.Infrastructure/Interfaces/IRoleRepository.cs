@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using ClothingShop.Domain.Entities;
 
-namespace ClothingShop.Domain.Interfaces;
+namespace ClothingShop.Infrastructure.Interfaces;
 
 public interface IRoleRepository
 {

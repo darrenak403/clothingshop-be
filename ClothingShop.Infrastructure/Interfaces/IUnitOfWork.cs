@@ -1,6 +1,4 @@
-﻿using ClothingShop.Domain.Entities;
-
-namespace ClothingShop.Domain.Interfaces
+﻿namespace ClothingShop.Infrastructure.Interfaces
 {
     /// <summary>
     /// Unit of Work Pattern - Quản lý tất cả repositories và đảm bảo tính nhất quán của giao dịch
@@ -9,7 +7,8 @@ namespace ClothingShop.Domain.Interfaces
     public interface IUnitOfWork : IDisposable
     {
         // Repository cho các entity chính
-        IGenericRepository<User> Users { get; }
+        IUserRepository Users { get; }
+        IAddressRepository Addresses { get; }
         IRoleRepository Roles { get; }
         IPasswordResetHistoryRepository PasswordResets { get; }
 

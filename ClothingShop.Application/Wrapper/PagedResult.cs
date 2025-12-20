@@ -2,10 +2,18 @@
 {
     public class PagedResult<T>
     {
-        public List<T> Items { get; set; } = new();
-        public int TotalCount { get; set; }
-        public int PageIndex { get; set; }
+        public IEnumerable<T> Data { get; set; }
+        public int PageNumber { get; set; }
         public int PageSize { get; set; }
-        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+        public int TotalRecords { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalRecords / PageSize);
+
+        public PagedResult(IEnumerable<T> data, int pageNumber, int pageSize, int totalRecords)
+        {
+            Data = data;
+            PageNumber = pageNumber;
+            PageSize = pageSize;
+            TotalRecords = totalRecords;
+        }
     }
 }

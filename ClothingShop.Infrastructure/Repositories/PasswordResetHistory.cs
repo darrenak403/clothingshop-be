@@ -1,6 +1,6 @@
 ﻿using ClothingShop.Domain.Entities;
 using ClothingShop.Domain.Enums;
-using ClothingShop.Domain.Interfaces;
+using ClothingShop.Infrastructure.Interfaces;
 using ClothingShop.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 

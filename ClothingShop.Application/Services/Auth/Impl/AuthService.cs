@@ -9,7 +9,6 @@ using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Domain.Entities;
 using ClothingShop.Domain.Enums;
-using ClothingShop.Domain.Interfaces;
 using ClothingShop.Infrastructure.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

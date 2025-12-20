@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
-using ClothingShop.Domain.Interfaces;
 using ClothingShop.Infrastructure.Interfaces;
 using ClothingShop.Infrastructure.Persistence;
 using ClothingShop.Infrastructure.Persistence.Context;
@@ -74,6 +73,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetHistoryRepository, PasswordResetHistoryRepository>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 

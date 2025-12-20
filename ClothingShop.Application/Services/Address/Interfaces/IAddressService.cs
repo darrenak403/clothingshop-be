@@ -1,6 +1,6 @@
 ﻿using ClothingShop.Application.DTOs.Address;
 
-namespace ClothingShop.Application.Services.UserProfile.Interfaces
+namespace ClothingShop.Application.Services.Address.Interfaces
 {
 
     public interface IAddressService

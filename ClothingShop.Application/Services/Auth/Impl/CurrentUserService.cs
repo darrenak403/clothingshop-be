@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Domain.Entities;
-using ClothingShop.Domain.Interfaces; // Giả sử bạn có IUnitOfWork hoặc IUserRepository
+using ClothingShop.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 
 public class CurrentUserService : ICurrentUserService

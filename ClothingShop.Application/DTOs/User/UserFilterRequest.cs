@@ -2,10 +2,9 @@
 {
     public class UserFilterRequest
     {
-        public string? SearchTerm { get; set; } // Tìm theo tên/email
-        public int? RoleId { get; set; }
-        public bool? IsActive { get; set; }
-        public int PageIndex { get; set; } = 1;
+        public string? Keyword { get; set; } // Tìm theo tên hoặc email
+        public bool? IsActive { get; set; }  // Lọc theo trạng thái
+        public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
 }

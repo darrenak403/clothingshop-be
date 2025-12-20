@@ -1,6 +1,6 @@
 ﻿using ClothingShop.Domain.Entities;
 
-namespace ClothingShop.Domain.Interfaces
+namespace ClothingShop.Infrastructure.Interfaces
 {
     public interface IPasswordResetHistoryRepository
     {

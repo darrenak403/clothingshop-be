@@ -1,5 +1,4 @@
-﻿using ClothingShop.Domain.Entities;
-using ClothingShop.Domain.Interfaces;
+﻿using ClothingShop.Infrastructure.Interfaces;
 using ClothingShop.Infrastructure.Persistence.Context;
 
 namespace ClothingShop.Infrastructure.Repositories
@@ -12,29 +11,15 @@ namespace ClothingShop.Infrastructure.Repositories
     {
         private readonly ClothingShopDbContext _context;
 
-        // Lazy initialization - chỉ tạo repository khi cần dùng
-        private IGenericRepository<User>? _users;
         private IRoleRepository? _roles;
+        private IUserRepository? _users;
+        private IAddressRepository? _addresses;
         private IPasswordResetHistoryRepository? _passwordResets;
 
         public UnitOfWork(ClothingShopDbContext context)
         {
             _context = context;
         }
-
-        /// <summary>
-        /// Repository cho User - Lazy initialization
-        /// Chỉ tạo instance khi được gọi lần đầu tiên
-        /// </summary>
-        public IGenericRepository<User> Users
-        {
-            get
-            {
-                _users ??= new GenericRepository<User>(_context);
-                return _users;
-            }
-        }
-
         /// <summary>
         /// Repository cho Role - Lazy initialization
         /// </summary>
@@ -44,6 +29,15 @@ namespace ClothingShop.Infrastructure.Repositories
             {
                 _roles ??= new RoleRepository(_context);
                 return _roles;
+            }
+        }
+
+        public IUserRepository Users
+        {
+            get
+            {
+                _users ??= new UserRepository(_context);
+                return _users;
             }
         }
 
@@ -59,11 +53,15 @@ namespace ClothingShop.Infrastructure.Repositories
             }
         }
 
-        /// <summary>
-        /// Lưu tất cả thay đổi vào database
-        /// Tất cả operations từ các repositories sẽ được commit cùng lúc
-        /// Nếu có lỗi, tất cả sẽ được rollback (Transaction)
-        /// </summary>
+        public IAddressRepository Addresses
+        {
+            get
+            {
+                _addresses ??= new AddressRepository(_context);
+                return _addresses;
+            }
+        }
+
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);
