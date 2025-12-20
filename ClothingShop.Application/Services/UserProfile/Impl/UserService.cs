@@ -6,27 +6,27 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
 {
     public class UserService : IUserService
     {
-        public Task<PagedResult<UserDto>> GetAllUsersAsync(UserFilterRequest query)
+        public Task<ApiResponse<PagedResult<UserDto>>> GetAllUsersAsync(UserFilterRequest query)
         {
             throw new NotImplementedException();
         }
 
-        public Task<UserProfileDto> GetMyProfileAsync(Guid userId)
+        public Task<ApiResponse<UserProfileDto>> GetMyProfileAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<UserDto> GetUserByIdAsync(Guid userId)
+        public Task<ApiResponse<UserDto>> GetUserByIdAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> ToggleUserStatusAsync(Guid userId, bool isActive, string? reason)
+        public Task<ApiResponse<bool>> ToggleUserStatusAsync(Guid userId, bool isActive, string? reason)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> UpdateMyProfileAsync(Guid userId, UpdateProfileRequest request)
+        public Task<ApiResponse<bool>> UpdateMyProfileAsync(Guid userId, UpdateProfileRequest request)
         {
             throw new NotImplementedException();
         }
