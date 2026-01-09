@@ -163,16 +163,30 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
         public async Task<ApiResponse<string>> LogoutAsync(string refreshToken)
         {
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return ApiResponse<string>.FailureResponse("Refresh token is required.", "Bad Request", HttpStatusCode.BadRequest);
+            }
+
             var user = await _unitOfWork.Users.FindAsync(u => u.RefreshToken == refreshToken);
+
             if (user == null)
-                return ApiResponse<string>.FailureResponse("Invalid refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
+            {
+                return ApiResponse<string>.FailureResponse("Refresh token not found or already revoked.", "Unauthorized", HttpStatusCode.Unauthorized);
+            }
 
             user.RefreshToken = null;
             user.RefreshTokenExpiry = null;
-            await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<string>.SuccessResponse(string.Empty, "Logged out successfully", HttpStatusCode.OK);
+            await _unitOfWork.Users.UpdateAsync(user);
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                return ApiResponse<string>.SuccessResponse(string.Empty, "Logged out successfully.", HttpStatusCode.OK);
+            }
+
+            return ApiResponse<string>.FailureResponse("Could not save changes.", "Internal Server Error", HttpStatusCode.InternalServerError);
         }
 
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)

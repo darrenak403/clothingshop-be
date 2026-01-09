@@ -53,9 +53,14 @@ namespace ClothingShop.API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             var response = await _authService.LogoutAsync(request.RefreshToken);
+
             if (!response.Success)
-                return BadRequest(response);
+            {
+                return StatusCode((int)response.Status, response);
+            }
+
             return Ok(response);
         }
 
