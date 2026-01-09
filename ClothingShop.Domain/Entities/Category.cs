@@ -10,6 +10,7 @@
         // Hierarchy (Cây thư mục)
         public Guid? ParentId { get; set; }
         public Category? Parent { get; set; }
+        public bool IsActive { get; set; } = true;
         public ICollection<Category> SubCategories { get; set; } = new List<Category>();
 
         public ICollection<Product> Products { get; set; } = new List<Product>();

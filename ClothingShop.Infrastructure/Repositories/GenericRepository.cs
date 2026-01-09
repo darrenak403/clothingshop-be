@@ -21,7 +21,10 @@ namespace ClothingShop.Infrastructure.Repositories
         {
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
-
+        public async Task<IEnumerable<T>> FindListAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
+        }
         public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
         public async Task<T?> GetByIdAsync(Guid id) => await _dbSet.FindAsync(id);

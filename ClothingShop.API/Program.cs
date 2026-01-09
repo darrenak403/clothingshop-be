@@ -3,6 +3,8 @@ using ClothingShop.Application.Services.AddressService.Impl;
 using ClothingShop.Application.Services.AddressService.Interfaces;
 using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
+using ClothingShop.Application.Services.CategoryService.Impl;
+using ClothingShop.Application.Services.CategoryService.Interfaces;
 using ClothingShop.Application.Services.UserProfile.Impl;
 using ClothingShop.Application.Services.UserProfile.Interfaces;
 using ClothingShop.Infrastructure.Interfaces;
@@ -82,6 +84,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<IPhotoService, PhotoService>();
