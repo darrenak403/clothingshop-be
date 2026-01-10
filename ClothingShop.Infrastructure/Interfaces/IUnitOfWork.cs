@@ -12,6 +12,7 @@
         IRoleRepository Roles { get; }
         IPasswordResetHistoryRepository PasswordResets { get; }
         ICategoryRepository Categories { get; }
+        IBrandRepository Brands { get; }
 
         // Có thể thêm các repository khác khi cần
         // IGenericRepository<Product> Products { get; }

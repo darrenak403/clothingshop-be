@@ -16,6 +16,7 @@ namespace ClothingShop.Infrastructure.Repositories
         private IAddressRepository? _addresses;
         private IPasswordResetHistoryRepository? _passwordResets;
         private ICategoryRepository? _categories;
+        private IBrandRepository? _brands;
 
         public UnitOfWork(ClothingShopDbContext context)
         {
@@ -69,6 +70,15 @@ namespace ClothingShop.Infrastructure.Repositories
             {
                 _categories ??= new CategoryRepository(_context);
                 return _categories;
+            }
+        }
+
+        public IBrandRepository Brands
+        {
+            get
+            {
+                _brands ??= new BrandRepository(_context);
+                return _brands;
             }
         }
 
