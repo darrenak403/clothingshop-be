@@ -11,8 +11,19 @@ namespace ClothingShop.Infrastructure.Repositories
         {
         }
 
-        //OVERRIDE để Include relationships
-        public async Task<Product?> GetByIdAsync(Guid id)
+        // ⭐ OVERRIDE GetAllAsync để Include relationships
+        public override async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Where(p => !p.IsDeleted)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+
+        // ⭐ OVERRIDE GetByIdAsync để Include relationships
+        public override async Task<Product?> GetByIdAsync(Guid id)
         {
             return await _dbSet
                 .Include(p => p.Category)      // Load Category

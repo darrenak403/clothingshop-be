@@ -17,8 +17,8 @@ namespace ClothingShop.Infrastructure.Repositories
             _dbSet = context.Set<T>();
         }
 
-        // ⭐ FIX: Lọc IsDeleted
-        public async Task<IEnumerable<T>> GetAllAsync()
+        // ⭐ FIX: Lọc IsDeleted + thêm virtual để có thể override
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.Where(e => !e.IsDeleted).ToListAsync();
         }
