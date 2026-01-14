@@ -8,6 +8,6 @@ namespace ClothingShop.Infrastructure.Interfaces
         /// Kiểm tra slug có trùng không (dùng khi Create/Update)
         /// </summary>
         /// <param name="slug">Slug cần check</param>
-        Task<bool> IsSlugUnique(string slug);
+        Task<bool> IsSlugUnique(string slug, Guid? excludeId = null);
     }
 }

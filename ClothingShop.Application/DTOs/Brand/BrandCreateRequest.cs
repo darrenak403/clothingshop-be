@@ -16,5 +16,6 @@ namespace ClothingShop.Application.DTOs.Brand
 
         [MaxLength(500, ErrorMessage = "Mô tả không quá 500 ký tự")]
         public string? Description { get; set; }
+        public string? Slug { get; } = null!;
     }
 }

@@ -1,9 +1,9 @@
-﻿using System.Text.RegularExpressions;
-using ClothingShop.Application.DTOs.Brand;
+﻿using ClothingShop.Application.DTOs.Brand;
 using ClothingShop.Application.Services.BrandService.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Domain.Entities;
 using ClothingShop.Infrastructure.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace ClothingShop.Application.Services.BrandService.Impl
 {

@@ -22,7 +22,10 @@ namespace ClothingShop.API.Controllers
         private Guid CurrentUserId => _currentUserService.UserId
                                       ?? throw new UnauthorizedAccessException("User ID is missing.");
 
-        // GET: api/addresses
+        // ============================================
+        // GET: api/address
+        // Lấy danh sách địa chỉ của user hiện tại
+        // ============================================
         [HttpGet]
         public async Task<IActionResult> GetMyAddressesAsync()
         {
@@ -30,7 +33,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
-        // GET: api/addresses/{id}
+        // ============================================
+        // GET: api/address/{addressId}
+        // Lấy chi tiết địa chỉ theo ID
+        // ============================================
         [HttpGet]
         [Route("{addressId:guid}")]
         public async Task<IActionResult> GetAddressByIdAsync([FromRoute] Guid addressId)
@@ -39,7 +45,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
+        // ============================================
         // POST: api/address
+        // Tạo địa chỉ mới
+        // ============================================
         [HttpPost]
         public async Task<IActionResult> CreateAddressAsync([FromBody] CreateAddressRequest request)
         {
@@ -47,7 +56,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
-        // PUT: api/address/{id}
+        // ============================================
+        // PUT: api/address/{addressId}
+        // Cập nhật địa chỉ
+        // ============================================
         [HttpPut]
         [Route("{addressId:guid}")]
         public async Task<IActionResult> UpdateAddressAsync([FromRoute] Guid addressId, [FromBody] UpdateAddressRequest request)
@@ -56,7 +68,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
-        // DELETE: api/address/{id}
+        // ============================================
+        // DELETE: api/address/{addressId}
+        // Xóa địa chỉ
+        // ============================================
         [HttpDelete]
         [Route("{addressId:guid}")]
         public async Task<IActionResult> DeleteAddressAsync([FromRoute] Guid addressId)
@@ -65,7 +80,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
-        //PATCH: api/addresses/{id}/default
+        // ============================================
+        // PATCH: api/address/{addressId}/default
+        // Đặt địa chỉ mặc định
+        // ============================================
         [HttpPatch]
         [Route("{addressId:guid}/default")]
         public async Task<IActionResult> SetDefaultAddressAsync([FromRoute] Guid addressId)

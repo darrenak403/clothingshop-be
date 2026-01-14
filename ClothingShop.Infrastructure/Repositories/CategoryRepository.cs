@@ -11,9 +11,13 @@ namespace ClothingShop.Infrastructure.Repositories
         {
         }
 
-        public async Task<bool> IsSlugUnique(string slug)
+        public async Task<bool> IsSlugUnique(string slug, Guid? excludeId = null)
         {
-            return !await _dbSet.AnyAsync(c => c.Slug == slug);
+            if (excludeId.HasValue)
+            {
+                return !await _dbSet.AnyAsync(p => p.Slug == slug && p.Id != excludeId.Value);
+            }
+            return !await _dbSet.AnyAsync(p => p.Slug == slug);
         }
     }
 }

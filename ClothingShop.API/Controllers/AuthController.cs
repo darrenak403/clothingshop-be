@@ -14,6 +14,10 @@ namespace ClothingShop.API.Controllers
             _authService = authService;
         }
 
+        // ============================================
+        // POST: api/auth/register
+        // Đăng ký tài khoản mới (Public)
+        // ============================================
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
@@ -26,6 +30,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode(response.Status, response);
         }
 
+        // ============================================
+        // POST: api/auth/login
+        // Đăng nhập (Public)
+        // ============================================
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -37,6 +45,10 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        // ============================================
+        // POST: api/auth/refresh-token
+        // Làm mới access token (Public)
+        // ============================================
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
@@ -48,6 +60,10 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        // ============================================
+        // POST: api/auth/logout
+        // Đăng xuất và thu hồi token
+        // ============================================
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
         {
@@ -64,6 +80,10 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        // ============================================
+        // POST: api/auth/forgot-password
+        // Gửi email reset mật khẩu (Public)
+        // ============================================
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
@@ -75,6 +95,10 @@ namespace ClothingShop.API.Controllers
             return Ok(response);
         }
 
+        // ============================================
+        // POST: api/auth/change-password
+        // Đặt mật khẩu mới từ email reset (Public)
+        // ============================================
         [HttpPost("change-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {

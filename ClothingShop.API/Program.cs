@@ -1,5 +1,4 @@
-﻿using System.Text;
-using ClothingShop.Application.Services.AddressService.Impl;
+﻿using ClothingShop.Application.Services.AddressService.Impl;
 using ClothingShop.Application.Services.AddressService.Interfaces;
 using ClothingShop.Application.Services.Auth.Impl;
 using ClothingShop.Application.Services.Auth.Interfaces;
@@ -7,6 +6,8 @@ using ClothingShop.Application.Services.BrandService.Impl;
 using ClothingShop.Application.Services.BrandService.Interfaces;
 using ClothingShop.Application.Services.CategoryService.Impl;
 using ClothingShop.Application.Services.CategoryService.Interfaces;
+using ClothingShop.Application.Services.ProductService.Impl;
+using ClothingShop.Application.Services.ProductService.Interfaces;
 using ClothingShop.Application.Services.UserProfile.Impl;
 using ClothingShop.Application.Services.UserProfile.Interfaces;
 using ClothingShop.Infrastructure.Interfaces;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +90,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<IPhotoService, PhotoService>();

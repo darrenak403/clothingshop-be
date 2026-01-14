@@ -13,6 +13,7 @@
         IPasswordResetHistoryRepository PasswordResets { get; }
         ICategoryRepository Categories { get; }
         IBrandRepository Brands { get; }
+        IProductRepository Products { get; }
 
         // Có thể thêm các repository khác khi cần
         // IGenericRepository<Product> Products { get; }

@@ -16,8 +16,10 @@ namespace ClothingShop.API.Controllers
             _categoryService = categoryService;
         }
 
+        // ============================================
         // GET: api/categories
-        // Lấy danh sách cây thư mục (Public - Ai cũng xem được)
+        // Lấy danh sách cây danh mục (Public)
+        // ============================================
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAllCategoriesRecursiveAsync()
@@ -28,8 +30,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
         // GET: api/categories/{id}
-        // Lấy chi tiết (Public)
+        // Lấy chi tiết danh mục (Public)
+        // ============================================
         [HttpGet]
         [Route("{id:guid}")]
         [AllowAnonymous]
@@ -39,8 +43,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
         // POST: api/categories
-        // Tạo mới (Chỉ Admin)
+        // Tạo danh mục mới (Admin only)
+        // ============================================
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategoryAsync([FromBody] CategoryCreateRequest request)
@@ -49,8 +55,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
         // PUT: api/categories/{id}
-        // Cập nhật (Chỉ Admin)
+        // Cập nhật danh mục (Admin only)
+        // ============================================
         [HttpPut]
         [Route("{id:guid}")]
         [Authorize(Roles = "Admin")]
@@ -60,8 +68,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
         // DELETE: api/categories/{id}
-        // Xóa (Chỉ Admin)
+        // Xóa danh mục (Admin only)
+        // ============================================
         [HttpDelete]
         [Route("{id:guid}")]
         [Authorize(Roles = "Admin")]

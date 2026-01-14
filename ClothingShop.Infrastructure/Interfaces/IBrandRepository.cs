@@ -9,6 +9,6 @@ namespace ClothingShop.Infrastructure.Interfaces
         /// </summary>
         /// <param name="slug">Slug cần check</param>
         /// <param name="excludeId">ID brand đang update (để loại trừ chính nó)</param>
-        Task<bool> IsSlugUnique(string slug);
+        Task<bool> IsSlugUnique(string slug, Guid? excludeId = null);
     }
 }

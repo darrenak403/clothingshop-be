@@ -15,6 +15,10 @@ namespace ClothingShop.API.Controllers
             _brandService = brandService;
         }
 
+        // ============================================
+        // GET: api/brands
+        // Lấy tất cả thương hiệu (Public)
+        // ============================================
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAllBrandsAsync()
@@ -23,6 +27,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
+        // GET: api/brands/id
+        // Lấy thương hiệu theo ID (Public)
+        // ============================================
         [HttpGet("id")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBrandById(Guid id)
@@ -31,6 +39,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
+        // POST: api/brands
+        // Tạo thương hiệu mới (Admin only)
+        // ============================================
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateBrand([FromBody] BrandCreateRequest request)
@@ -44,6 +56,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
+        // PUT: api/brands/{id}
+        // Cập nhật thương hiệu (Admin only)
+        // ============================================
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateBrand(Guid id, [FromBody] BrandCreateRequest request)
@@ -57,6 +73,10 @@ namespace ClothingShop.API.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // ============================================
+        // DELETE: api/brands/{id}
+        // Xóa thương hiệu (Admin only)
+        // ============================================
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBrand(Guid id)
