@@ -95,6 +95,18 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 
+// 5. CẤU HÌNH CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:8989", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -126,6 +138,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS phải được thêm trước Authentication và Authorization
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication(); // Phải trước Authorization
 app.UseAuthorization();
