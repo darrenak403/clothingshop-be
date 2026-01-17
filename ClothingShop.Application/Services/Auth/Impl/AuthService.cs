@@ -1,9 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using ClothingShop.Application.DTOs.Auth;
+﻿using ClothingShop.Application.DTOs.Auth;
 using ClothingShop.Application.DTOs.User;
 using ClothingShop.Application.Services.Auth.Interfaces;
 using ClothingShop.Application.Wrapper;
@@ -12,6 +7,11 @@ using ClothingShop.Domain.Enums;
 using ClothingShop.Infrastructure.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ClothingShop.Application.Services.Auth.Impl
 {
@@ -38,14 +38,14 @@ namespace ClothingShop.Application.Services.Auth.Impl
         {
             var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser == null)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponse>.FailureResponse("Người dùng không tồn tại.", "Unauthorized", HttpStatusCode.Unauthorized);
 
             var isPasswordValid = _passwordHasher.VerifyPassword(existingUser.PasswordHash, request.Password);
             if (!isPasswordValid)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid email or password.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponse>.FailureResponse("Mật khẩu không chính xác", "Unauthorized", HttpStatusCode.Unauthorized);
 
             if (!existingUser.IsActive)
-                return ApiResponse<LoginResponse>.FailureResponse("Account is locked.", "Forbidden", HttpStatusCode.Forbidden);
+                return ApiResponse<LoginResponse>.FailureResponse("Tài khoản của bạn đã bị khóa!.", "Forbidden", HttpStatusCode.Forbidden);
 
             var loginResponse = await GenerateAndSaveTokensAsync(existingUser);
             return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Login successful", HttpStatusCode.OK);
