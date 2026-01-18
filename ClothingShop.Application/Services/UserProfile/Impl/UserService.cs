@@ -139,7 +139,7 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
                 TotalOrders = u.Orders?.Count ?? 0
             }).ToList();
 
-            return ApiResponse<PagedResult<UserDto>>.SuccessPagedResponse(
+            return ApiResponse<UserDto>.SuccessPagedResponse(
                 userDtos,
                 totalCount,
                 query.PageNumber,

@@ -20,13 +20,13 @@ namespace ClothingShop.Application.Wrapper
                 Data = data,
             };
         }
-        public static ApiResponse<T> FailureResponse(string errors, string message = "Thất bại", HttpStatusCode status = HttpStatusCode.BadRequest)
+        public static ApiResponse<T> FailureResponse(string errors, HttpStatusCode status = HttpStatusCode.BadRequest)
         {
             return new ApiResponse<T>
             {
                 Status = (int)status,
                 Success = false,
-                Message = message,
+                Message = "Thất bại",
                 Errors = errors,
             };
         }

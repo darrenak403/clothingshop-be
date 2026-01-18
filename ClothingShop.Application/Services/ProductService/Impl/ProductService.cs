@@ -3,6 +3,7 @@ using ClothingShop.Application.Services.ProductService.Interfaces;
 using ClothingShop.Application.Wrapper;
 using ClothingShop.Domain.Entities;
 using ClothingShop.Infrastructure.Interfaces;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace ClothingShop.Application.Services.ProductService.Impl
