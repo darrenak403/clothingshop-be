@@ -22,11 +22,11 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                 var brands = await _unitOfWork.Brands.GetAllAsync();
                 var brandDTOs = brands.Select(MapToDTO).OrderBy(b => b.Name).ToList();
 
-                return ApiResponse<List<BrandDTO>>.SuccessResponse(brandDTOs, "Lấy danh sách thương hiệu thành công", System.Net.HttpStatusCode.OK);
+                return ApiResponse<List<BrandDTO>>.SuccessResponse(brandDTOs, "Lấy danh sách thương hiệu thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<BrandDTO>>.FailureResponse("Đã xảy ra lỗi khi lấy danh sách thương hiệu", "ServerError", System.Net.HttpStatusCode.InternalServerError);
+                return ApiResponse<List<BrandDTO>>.FailureResponse("Đã xảy ra lỗi khi lấy danh sách thương hiệu", System.Net.HttpStatusCode.InternalServerError);
             }
         }
 
@@ -38,15 +38,15 @@ namespace ClothingShop.Application.Services.BrandService.Impl
 
                 if (brand == null)
                 {
-                    return ApiResponse<BrandDTO>.FailureResponse("Thương hiệu không tồn tại", "NotFound", System.Net.HttpStatusCode.NotFound);
+                    return ApiResponse<BrandDTO>.FailureResponse("Thương hiệu không tồn tại", System.Net.HttpStatusCode.NotFound);
                 }
 
                 var brandDTO = MapToDTO(brand);
-                return ApiResponse<BrandDTO>.SuccessResponse(brandDTO, "Lấy thông tin thương hiệu thành công", System.Net.HttpStatusCode.OK);
+                return ApiResponse<BrandDTO>.SuccessResponse(brandDTO, "Lấy thông tin thương hiệu thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi lấy thông tin thương hiệu", "ServerError", System.Net.HttpStatusCode.InternalServerError);
+                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi lấy thông tin thương hiệu", System.Net.HttpStatusCode.InternalServerError);
             }
         }
 
@@ -59,7 +59,7 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                 var isSlugUnique = await _unitOfWork.Brands.IsSlugUnique(slug);
                 if (!isSlugUnique)
                 {
-                    return ApiResponse<BrandDTO>.FailureResponse("Slug đã được sử dụng", "ValidationError", System.Net.HttpStatusCode.BadRequest);
+                    return ApiResponse<BrandDTO>.FailureResponse("Slug đã được sử dụng", System.Net.HttpStatusCode.BadRequest);
                 }
 
                 var newBrand = new Brand
@@ -79,7 +79,7 @@ namespace ClothingShop.Application.Services.BrandService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi tạo thương hiệu", "ServerError", System.Net.HttpStatusCode.InternalServerError);
+                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi tạo thương hiệu", System.Net.HttpStatusCode.InternalServerError);
             }
         }
 
@@ -90,7 +90,7 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                 var brand = await _unitOfWork.Brands.GetByIdAsync(id);
                 if (brand == null)
                 {
-                    return ApiResponse<BrandDTO>.FailureResponse("Thương hiệu không tồn tại", "NotFound", System.Net.HttpStatusCode.NotFound);
+                    return ApiResponse<BrandDTO>.FailureResponse("Thương hiệu không tồn tại", System.Net.HttpStatusCode.NotFound);
                 }
 
                 var slug = string.IsNullOrWhiteSpace(request.Slug) ? GenerateSlug(request.Name) : GenerateSlug(request.Slug);
@@ -100,7 +100,7 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                     var isSlugUnique = await _unitOfWork.Brands.IsSlugUnique(slug);
                     if (!isSlugUnique)
                     {
-                        return ApiResponse<BrandDTO>.FailureResponse("Slug đã được sử dụng", "ValidationError", System.Net.HttpStatusCode.BadRequest);
+                        return ApiResponse<BrandDTO>.FailureResponse("Slug đã được sử dụng", System.Net.HttpStatusCode.BadRequest);
                     }
                 }
 
@@ -113,11 +113,11 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                 await _unitOfWork.Brands.UpdateAsync(brand);
                 await _unitOfWork.SaveChangesAsync();
                 var brandDTO = MapToDTO(brand);
-                return ApiResponse<BrandDTO>.SuccessResponse(brandDTO, "Cập nhật thương hiệu thành công", System.Net.HttpStatusCode.OK);
+                return ApiResponse<BrandDTO>.SuccessResponse(brandDTO, "Cập nhật thương hiệu thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi cập nhật thương hiệu", "ServerError", System.Net.HttpStatusCode.InternalServerError);
+                return ApiResponse<BrandDTO>.FailureResponse("Đã xảy ra lỗi khi cập nhật thương hiệu", System.Net.HttpStatusCode.InternalServerError);
             }
         }
 
@@ -129,7 +129,7 @@ namespace ClothingShop.Application.Services.BrandService.Impl
                 var brand = await _unitOfWork.Brands.GetByIdAsync(id);
                 if (brand == null)
                 {
-                    return ApiResponse<bool>.FailureResponse("Thương hiệu không tồn tại", "NotFound", System.Net.HttpStatusCode.NotFound);
+                    return ApiResponse<bool>.FailureResponse("Thương hiệu không tồn tại", System.Net.HttpStatusCode.NotFound);
                 }
 
                 // 2. TODO: Check xem brand có product nào không
@@ -144,11 +144,11 @@ namespace ClothingShop.Application.Services.BrandService.Impl
 
                 _unitOfWork.Brands.Delete(brand);
                 await _unitOfWork.SaveChangesAsync();
-                return ApiResponse<bool>.SuccessResponse(true, "Xóa thương hiệu thành công", System.Net.HttpStatusCode.OK);
+                return ApiResponse<bool>.SuccessResponse(true, "Xóa thương hiệu thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi xóa thương hiệu", "ServerError", System.Net.HttpStatusCode.InternalServerError);
+                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi xóa thương hiệu", System.Net.HttpStatusCode.InternalServerError);
             }
         }
 

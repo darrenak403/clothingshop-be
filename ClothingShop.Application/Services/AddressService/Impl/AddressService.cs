@@ -48,7 +48,7 @@ namespace ClothingShop.Application.Services.AddressService.Impl
                 IsDefault = a.IsDefault
             });
 
-            return ApiResponse<IEnumerable<AddressDto>>.SuccessResponse(addressDtos, "Lấy danh sách địa chỉ thành công", HttpStatusCode.OK);
+            return ApiResponse<IEnumerable<AddressDto>>.SuccessResponse(addressDtos, "Lấy danh sách địa chỉ thành công");
         }
 
         public async Task<ApiResponse<AddressDto>> GetAddressByIdAsync(Guid userId, Guid addressId)
@@ -56,11 +56,11 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
 
             if (address == null)
-                return ApiResponse<AddressDto>.FailureResponse("Địa chỉ không tồn tại", "NotFound");
+                return ApiResponse<AddressDto>.FailureResponse("Địa chỉ không tồn tại", HttpStatusCode.NotFound);
 
             if (address.UserId != userId)
             {
-                return ApiResponse<AddressDto>.FailureResponse("Địa chỉ không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<AddressDto>.FailureResponse("Địa chỉ không tồn tại", HttpStatusCode.NotFound);
             }
 
             var addressDto = new AddressDto
@@ -75,7 +75,7 @@ namespace ClothingShop.Application.Services.AddressService.Impl
                 IsDefault = address.IsDefault
             };
 
-            return ApiResponse<AddressDto>.SuccessResponse(addressDto, "Lấy thông tin địa chỉ thành công", HttpStatusCode.OK);
+            return ApiResponse<AddressDto>.SuccessResponse(addressDto, "Lấy thông tin địa chỉ thành công");
         }
 
         public async Task<ApiResponse<AddressDto>> CreateAddressAsync(Guid userId, CreateAddressRequest request)
@@ -123,10 +123,10 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
 
             if (address == null)
-                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", HttpStatusCode.NotFound);
 
             if (address.UserId != userId)
-                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", "Forbidden", HttpStatusCode.Forbidden);
+                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", HttpStatusCode.Forbidden);
 
             // Logic: Nếu user muốn set địa chỉ này thành Default
             if (request.IsDefault && !address.IsDefault)
@@ -146,7 +146,7 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             await _unitOfWork.Addresses.UpdateAsync(address);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<bool>.SuccessResponse(true, "Cập nhật địa chỉ thành công", HttpStatusCode.OK);
+            return ApiResponse<bool>.SuccessResponse(true, "Cập nhật địa chỉ thành công");
         }
 
         public async Task<ApiResponse<bool>> DeleteAddressAsync(Guid userId, Guid addressId)
@@ -154,16 +154,16 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
 
             if (address == null)
-                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", HttpStatusCode.NotFound);
 
             if (address.UserId != userId)
-                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", "Forbidden", HttpStatusCode.Forbidden);
+                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", HttpStatusCode.Forbidden);
 
 
             _unitOfWork.Addresses.Delete(address);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<bool>.SuccessResponse(true, "Xóa địa chỉ thành công", HttpStatusCode.OK);
+            return ApiResponse<bool>.SuccessResponse(true, "Xóa địa chỉ thành công");
         }
 
 
@@ -172,10 +172,10 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
 
             if (address == null)
-                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Địa chỉ không tồn tại", HttpStatusCode.NotFound);
 
             if (address.UserId != userId)
-                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", "Forbidden", HttpStatusCode.Forbidden);
+                return ApiResponse<bool>.FailureResponse("Bạn không có quyền cập nhật địa chỉ này", HttpStatusCode.Forbidden);
 
             await UnsetDefaultAddressForUser(userId);
 
@@ -185,7 +185,7 @@ namespace ClothingShop.Application.Services.AddressService.Impl
             await _unitOfWork.Addresses.UpdateAsync(address);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<bool>.SuccessResponse(true, "Đặt địa chỉ mặc định thành công", HttpStatusCode.OK);
+            return ApiResponse<bool>.SuccessResponse(true, "Đặt địa chỉ mặc định thành công");
 
         }
 

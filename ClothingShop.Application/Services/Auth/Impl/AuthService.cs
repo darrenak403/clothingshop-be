@@ -38,17 +38,17 @@ namespace ClothingShop.Application.Services.Auth.Impl
         {
             var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser == null)
-                return ApiResponse<LoginResponse>.FailureResponse("Người dùng không tồn tại.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponse>.FailureResponse("Người dùng không tồn tại", HttpStatusCode.Unauthorized);
 
             var isPasswordValid = _passwordHasher.VerifyPassword(existingUser.PasswordHash, request.Password);
             if (!isPasswordValid)
-                return ApiResponse<LoginResponse>.FailureResponse("Mật khẩu không chính xác", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponse>.FailureResponse("Mật khẩu không chính xác", HttpStatusCode.Unauthorized);
 
             if (!existingUser.IsActive)
-                return ApiResponse<LoginResponse>.FailureResponse("Tài khoản của bạn đã bị khóa!.", "Forbidden", HttpStatusCode.Forbidden);
+                return ApiResponse<LoginResponse>.FailureResponse("Tài khoản của bạn đã bị khóa", HttpStatusCode.Forbidden);
 
             var loginResponse = await GenerateAndSaveTokensAsync(existingUser);
-            return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Login successful", HttpStatusCode.OK);
+            return ApiResponse<LoginResponse>.SuccessResponse(loginResponse, "Đăng nhập thành công");
         }
 
         private async Task<LoginResponse> GenerateAndSaveTokensAsync(User existingUser)
@@ -118,11 +118,11 @@ namespace ClothingShop.Application.Services.Auth.Impl
         {
             var existingUser = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (existingUser != null)
-                return ApiResponse<RegisterResponse>.FailureResponse("Email is already registered.", "Conflict", HttpStatusCode.Conflict);
+                return ApiResponse<RegisterResponse>.FailureResponse("Email đã được đăng ký", HttpStatusCode.Conflict);
 
             var role = await _unitOfWork.Roles.GetByNameAsync("Customer");
             if (role == null)
-                return ApiResponse<RegisterResponse>.FailureResponse("Default role not found.", "Server error", HttpStatusCode.InternalServerError);
+                return ApiResponse<RegisterResponse>.FailureResponse("Không tìm thấy vai trò mặc định", HttpStatusCode.InternalServerError);
 
             var user = new User
             {
@@ -148,31 +148,31 @@ namespace ClothingShop.Application.Services.Auth.Impl
                 }
             };
 
-            return ApiResponse<RegisterResponse>.SuccessResponse(registerResponse, "Registered", HttpStatusCode.Created);
+            return ApiResponse<RegisterResponse>.SuccessResponse(registerResponse, "Đăng ký thành công", HttpStatusCode.Created);
         }
 
         public async Task<ApiResponse<LoginResponse>> RefreshTokenAsync(string refreshToken)
         {
             var user = await _unitOfWork.Users.FindAsync(u => u.RefreshToken == refreshToken);
             if (user == null || user.RefreshTokenExpiry == null || user.RefreshTokenExpiry <= DateTime.UtcNow)
-                return ApiResponse<LoginResponse>.FailureResponse("Invalid or expired refresh token.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponse>.FailureResponse("Refresh token không hợp lệ hoặc đã hết hạn", HttpStatusCode.Unauthorized);
 
             var result = await GenerateAndSaveTokensAsync(user);
-            return ApiResponse<LoginResponse>.SuccessResponse(result, "Token refreshed", HttpStatusCode.OK);
+            return ApiResponse<LoginResponse>.SuccessResponse(result, "Làm mới token thành công");
         }
 
         public async Task<ApiResponse<string>> LogoutAsync(string refreshToken)
         {
             if (string.IsNullOrEmpty(refreshToken))
             {
-                return ApiResponse<string>.FailureResponse("Refresh token is required.", "Bad Request", HttpStatusCode.BadRequest);
+                return ApiResponse<string>.FailureResponse("Refresh token là bắt buộc", HttpStatusCode.BadRequest);
             }
 
             var user = await _unitOfWork.Users.FindAsync(u => u.RefreshToken == refreshToken);
 
             if (user == null)
             {
-                return ApiResponse<string>.FailureResponse("Refresh token not found or already revoked.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<string>.FailureResponse("Refresh token không tồn tại hoặc đã bị thu hồi", HttpStatusCode.Unauthorized);
             }
 
             user.RefreshToken = null;
@@ -183,22 +183,22 @@ namespace ClothingShop.Application.Services.Auth.Impl
 
             if (result > 0)
             {
-                return ApiResponse<string>.SuccessResponse(string.Empty, "Logged out successfully.", HttpStatusCode.OK);
+                return ApiResponse<string>.SuccessResponse(string.Empty, "Đăng xuất thành công");
             }
 
-            return ApiResponse<string>.FailureResponse("Could not save changes.", "Internal Server Error", HttpStatusCode.InternalServerError);
+            return ApiResponse<string>.FailureResponse("Không thể lưu thay đổi", HttpStatusCode.InternalServerError);
         }
 
         public async Task<ApiResponse<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
             var user = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (user == null)
-                return ApiResponse<string>.FailureResponse("Email not found.", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<string>.FailureResponse("Email không tồn tại", HttpStatusCode.NotFound);
 
             // 1. Check rate limiting: Max 5 requests per day
             var todayCount = await _unitOfWork.PasswordResets.GetTodayRequestCountAsync(user.Id);
             if (todayCount >= 5)
-                return ApiResponse<string>.FailureResponse("Quá nhiều yêu cầu. Vui lòng thử lại sau 24 giờ.", "TooManyRequests", HttpStatusCode.TooManyRequests);
+                return ApiResponse<string>.FailureResponse("Quá nhiều yêu cầu. Vui lòng thử lại sau 24 giờ", HttpStatusCode.TooManyRequests);
 
             // 2. Generate OTP settings
             var otp = GenerateOtp();
@@ -242,7 +242,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
             try
             {
                 await _emailService.SendOtpEmailAsync(user.Email, user.FullName, otp, otpExpiryMinutes);
-                return ApiResponse<string>.SuccessResponse(string.Empty, "OTP đã được gửi đến email của bạn", HttpStatusCode.OK);
+                return ApiResponse<string>.SuccessResponse(string.Empty, "OTP đã được gửi đến email của bạn");
             }
             catch (Exception ex)
             {
@@ -251,7 +251,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                 await _unitOfWork.PasswordResets.UpdateAsync(historyToEmail);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<string>.FailureResponse($"Không thể gửi email: {ex.Message}", "Email Error", HttpStatusCode.InternalServerError);
+                return ApiResponse<string>.FailureResponse($"Không thể gửi email: {ex.Message}", HttpStatusCode.InternalServerError);
             }
         }
 
@@ -259,7 +259,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
         {
             var user = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
             if (user == null)
-                return ApiResponse<string>.FailureResponse("Email not found.", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<string>.FailureResponse("Email không tồn tại", HttpStatusCode.NotFound);
 
             // Get latest valid OTP
             var resetHistory = await _unitOfWork.PasswordResets.GetLatestValidOtpAsync(user.Id, request.Otp);
@@ -284,7 +284,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
                     await _unitOfWork.SaveChangesAsync();
                 }
 
-                return ApiResponse<string>.FailureResponse("OTP không hợp lệ hoặc đã hết hạn.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<string>.FailureResponse("OTP không hợp lệ hoặc đã hết hạn", HttpStatusCode.Unauthorized);
             }
 
             // Reset password
@@ -302,18 +302,18 @@ namespace ClothingShop.Application.Services.Auth.Impl
             await _unitOfWork.PasswordResets.UpdateAsync(resetHistory);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được đặt lại thành công", HttpStatusCode.OK);
+            return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được đặt lại thành công");
         }
 
         public async Task<ApiResponse<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<string>.FailureResponse("Không tìm thấy người dùng.", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<string>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
             var isValidPassword = _passwordHasher.VerifyPassword(user.PasswordHash, request.CurrentPassword);
             if (!isValidPassword)
-                return ApiResponse<string>.FailureResponse("Mật khẩu hiện tại không chính xác.", "Unauthorized", HttpStatusCode.Unauthorized);
+                return ApiResponse<string>.FailureResponse("Mật khẩu hiện tại không chính xác", HttpStatusCode.Unauthorized);
 
             user.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
             user.RefreshToken = null;
@@ -322,7 +322,7 @@ namespace ClothingShop.Application.Services.Auth.Impl
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được thay đổi thành công", HttpStatusCode.OK);
+            return ApiResponse<string>.SuccessResponse(string.Empty, "Mật khẩu đã được thay đổi thành công");
         }
 
         private string GenerateOtp(int length = 6)

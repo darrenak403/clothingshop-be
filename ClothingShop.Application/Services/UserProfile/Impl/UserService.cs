@@ -22,7 +22,7 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<UserProfileDto>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<UserProfileDto>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
             var role = await _unitOfWork.Roles.GetByIdAsync(user.RoleId);
 
@@ -38,14 +38,14 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
                 RoleName = role?.Name ?? "N/A"
             };
 
-            return ApiResponse<UserProfileDto>.SuccessResponse(userProfile, "Lấy thông tin thành công", HttpStatusCode.OK);
+            return ApiResponse<UserProfileDto>.SuccessResponse(userProfile, "Lấy thông tin thành công");
         }
 
         public async Task<ApiResponse<bool>> UpdateMyProfileAsync(Guid userId, UpdateProfileRequest request)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
 
             // 1. FullName: Nếu request có gửi chuỗi (không rỗng/null) thì mới update
@@ -87,12 +87,12 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
             var result = await _photoService.AddPhotoAsync(file);
 
             if (result.Error != null)
-                return ApiResponse<bool>.FailureResponse("Lỗi khi tải ảnh lên Cloudinary: " + result.Error.Message, "UploadError", HttpStatusCode.InternalServerError);
+                return ApiResponse<bool>.FailureResponse("Lỗi khi tải ảnh lên Cloudinary: " + result.Error.Message, HttpStatusCode.InternalServerError);
 
             // 3. (Tùy chọn) Xóa ảnh cũ trên Cloudinary nếu cần thiết
             // if (!string.IsNullOrEmpty(user.AvatarUrl)) { ... logic xóa ... }
@@ -139,9 +139,12 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
                 TotalOrders = u.Orders?.Count ?? 0
             }).ToList();
 
-            var pagedResult = new PagedResult<UserDto>(userDtos, query.PageNumber, query.PageSize, totalCount);
-
-            return ApiResponse<PagedResult<UserDto>>.SuccessResponse(pagedResult, "Lấy danh sách người dùng thành công", HttpStatusCode.OK);
+            return ApiResponse<PagedResult<UserDto>>.SuccessPagedResponse(
+                userDtos,
+                totalCount,
+                query.PageNumber,
+                query.PageSize,
+                "Lấy danh sách người dùng thành công");
         }
 
 
@@ -149,7 +152,7 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<UserDto>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<UserDto>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
             var role = await _unitOfWork.Roles.GetByIdAsync(user.RoleId);
 
@@ -174,17 +177,17 @@ namespace ClothingShop.Application.Services.UserProfile.Impl
                 TotalOrders = user.Orders?.Count ?? 0
             };
 
-            return ApiResponse<UserDto>.SuccessResponse(userDto, "Lấy thông tin người dùng thành công", HttpStatusCode.OK);
+            return ApiResponse<UserDto>.SuccessResponse(userDto, "Lấy thông tin người dùng thành công");
         }
 
         public async Task<ApiResponse<bool>> ToggleUserStatusAsync(Guid userId, bool isActive, string? reason)
         {
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
             if (user == null)
-                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", "NotFound", HttpStatusCode.NotFound);
+                return ApiResponse<bool>.FailureResponse("Không tìm thấy người dùng", HttpStatusCode.NotFound);
 
             if (user.IsActive == isActive)
-                return ApiResponse<bool>.FailureResponse("Trạng thái tài khoản không thay đổi", "BadRequest", HttpStatusCode.BadRequest);
+                return ApiResponse<bool>.FailureResponse("Trạng thái tài khoản không thay đổi", HttpStatusCode.BadRequest);
 
             user.IsActive = isActive;
 

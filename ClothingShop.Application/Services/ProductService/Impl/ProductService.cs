@@ -23,7 +23,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var category = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId);
                 if (category == null)
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Danh mục không tồn tại", "Lỗi khi tạo sản phẩm");
+                    return ApiResponse<ProductDTO>.FailureResponse("Danh mục không tồn tại", HttpStatusCode.BadRequest);
                 }
 
                 //B2: validate BrandId (nếu có)
@@ -32,7 +32,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                     var brand = await _unitOfWork.Brands.GetByIdAsync(request.BrandId.Value);
                     if (brand == null)
                     {
-                        return ApiResponse<ProductDTO>.FailureResponse("Thương hiệu không tồn tại", "Lỗi khi tạo sản phẩm");
+                        return ApiResponse<ProductDTO>.FailureResponse("Thương hiệu không tồn tại", HttpStatusCode.BadRequest);
                     }
                 }
 
@@ -40,7 +40,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 string slug = GenerateSlug(request.Name);
                 if (!await _unitOfWork.Products.IsSlugUnique(slug))
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Đường dẫn đã tồn tại, vui lòng chọn tên khác", "Lỗi khi tạo sản phẩm");
+                    return ApiResponse<ProductDTO>.FailureResponse("Đường dẫn đã tồn tại, vui lòng chọn tên khác", HttpStatusCode.BadRequest);
                 }
                 var product = new Product
                 {
@@ -71,7 +71,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, "Lỗi khi tạo sản phẩm");
+                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
 
         }
@@ -83,20 +83,20 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var product = await _unitOfWork.Products.GetByIdAsync(id);
                 if (product == null)
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Sản phẩm không tồn tại", "Lỗi khi cập nhật sản phẩm");
+                    return ApiResponse<ProductDTO>.FailureResponse("Sản phẩm không tồn tại", HttpStatusCode.NotFound);
 
                 }
                 var category = await _unitOfWork.Categories.GetByIdAsync(request.CategoryId);
                 if (category == null)
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Danh mục không tồn tại", "Lỗi khi cập nhật sản phẩm");
+                    return ApiResponse<ProductDTO>.FailureResponse("Danh mục không tồn tại", HttpStatusCode.BadRequest);
                 }
                 if (request.BrandId.HasValue)
                 {
                     var brand = await _unitOfWork.Brands.GetByIdAsync(request.BrandId.Value);
                     if (brand == null)
                     {
-                        return ApiResponse<ProductDTO>.FailureResponse("Thương hiệu không tồn tại", "Lỗi khi cập nhật sản phẩm");
+                        return ApiResponse<ProductDTO>.FailureResponse("Thương hiệu không tồn tại", HttpStatusCode.BadRequest);
                     }
                 }
                 string newSlug = GenerateSlug(request.Name);
@@ -104,7 +104,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 {
                     if (!await _unitOfWork.Products.IsSlugUnique(newSlug, id))
                     {
-                        return ApiResponse<ProductDTO>.FailureResponse("Đường dẫn đã tồn tại, vui lòng chọn tên khác", "Lỗi khi cập nhật sản phẩm");
+                        return ApiResponse<ProductDTO>.FailureResponse("Đường dẫn đã tồn tại, vui lòng chọn tên khác", HttpStatusCode.BadRequest);
                     }
                     product.Slug = newSlug;
                 }
@@ -134,7 +134,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, "Lỗi khi cập nhật sản phẩm");
+                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
 
         }
@@ -146,7 +146,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var product = await _unitOfWork.Products.GetByIdAsync(id);
                 if (product == null)
                 {
-                    return ApiResponse<bool>.FailureResponse("Sản phẩm không tồn tại", "Lỗi khi xóa sản phẩm");
+                    return ApiResponse<bool>.FailureResponse("Sản phẩm không tồn tại", HttpStatusCode.NotFound);
 
                 }
 
@@ -157,7 +157,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.FailureResponse(ex.Message, "Lỗi khi xóa sản phẩm");
+                return ApiResponse<bool>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -173,7 +173,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, "Lỗi khi lấy sản phẩm");
+                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -184,14 +184,14 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var product = await _unitOfWork.Products.GetByIdAsync(id);
                 if (product == null)
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Không tìm thấy sản phẩm", "");
+                    return ApiResponse<ProductDTO>.FailureResponse("Không tìm thấy sản phẩm", HttpStatusCode.NotFound);
                 }
                 var productDTO = MapToDTO(product);
-                return ApiResponse<ProductDTO>.SuccessResponse(productDTO, "Product retrieved successfully");
+                return ApiResponse<ProductDTO>.SuccessResponse(productDTO, "Lấy thông tin sản phẩm thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, "Error retrieving product");
+                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -206,7 +206,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, "Lỗi khi lấy sản phẩm nổi bật");
+                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -218,15 +218,15 @@ namespace ClothingShop.Application.Services.ProductService.Impl
 
                 if (product == null)
                 {
-                    return ApiResponse<ProductDTO>.FailureResponse("Product not found", "Error retrieving product");
+                    return ApiResponse<ProductDTO>.FailureResponse("Không tìm thấy sản phẩm", HttpStatusCode.NotFound);
                 }
 
                 var productDTO = MapToDTO(product);
-                return ApiResponse<ProductDTO>.SuccessResponse(productDTO, "Product retrieved successfully");
+                return ApiResponse<ProductDTO>.SuccessResponse(productDTO, "Lấy thông tin sản phẩm thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, "Error retrieving product");
+                return ApiResponse<ProductDTO>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -238,10 +238,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var brand = await _unitOfWork.Brands.GetByIdAsync(brandId);
                 if (brand == null)
                 {
-                    return ApiResponse<List<ProductDTO>>.FailureResponse(
-                        "Không tìm thấy thương hiệu"
-                    );
-
+                    return ApiResponse<List<ProductDTO>>.FailureResponse("Không tìm thấy thương hiệu", HttpStatusCode.NotFound);
                 }
 
                 var products = await _unitOfWork.Products.GetByBrandAsync(brandId);
@@ -251,7 +248,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, "Lỗi khi lấy sản phẩm theo thương hiệu");
+                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -263,9 +260,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
                 var category = await _unitOfWork.Categories.GetByIdAsync(categoryId);
                 if (category == null)
                 {
-                    return ApiResponse<List<ProductDTO>>.FailureResponse(
-                        "Không tìm thấy danh mục"
-                    );
+                    return ApiResponse<List<ProductDTO>>.FailureResponse("Không tìm thấy danh mục", HttpStatusCode.NotFound);
                 }
 
                 var products = await _unitOfWork.Products.GetByCategoryAsync(categoryId);
@@ -275,7 +270,7 @@ namespace ClothingShop.Application.Services.ProductService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, "Lỗi khi lấy sản phẩm theo danh mục");
+                return ApiResponse<List<ProductDTO>>.FailureResponse(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 

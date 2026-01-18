@@ -33,11 +33,11 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
                     result.Add(dto);
                 }
 
-                return ApiResponse<List<CategoryDTO>>.SuccessResponse(result, "Lấy danh sách danh mục thành công", HttpStatusCode.OK);
+                return ApiResponse<List<CategoryDTO>>.SuccessResponse(result, "Lấy danh sách danh mục thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<List<CategoryDTO>>.FailureResponse("Đã xảy ra lỗi khi lấy danh sách danh mục", "ServerError", HttpStatusCode.InternalServerError);
+                return ApiResponse<List<CategoryDTO>>.FailureResponse("Đã xảy ra lỗi khi lấy danh sách danh mục", HttpStatusCode.InternalServerError);
             }
         }
 
@@ -51,15 +51,15 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
 
                 if (category == null)
                 {
-                    return ApiResponse<CategoryDTO>.FailureResponse("Danh mục không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                    return ApiResponse<CategoryDTO>.FailureResponse("Danh mục không tồn tại", HttpStatusCode.NotFound);
                 }
 
                 var categoryDto = MapToDto(category);
-                return ApiResponse<CategoryDTO>.SuccessResponse(categoryDto, "Lấy thông tin danh mục thành công", HttpStatusCode.OK);
+                return ApiResponse<CategoryDTO>.SuccessResponse(categoryDto, "Lấy thông tin danh mục thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<CategoryDTO>.FailureResponse("Đã xảy ra lỗi khi lấy thông tin danh mục", "ServerError", HttpStatusCode.InternalServerError);
+                return ApiResponse<CategoryDTO>.FailureResponse("Đã xảy ra lỗi khi lấy thông tin danh mục", HttpStatusCode.InternalServerError);
             }
         }
 
@@ -69,7 +69,7 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
             {
                 if (string.IsNullOrWhiteSpace(request.Name))
                 {
-                    return ApiResponse<bool>.FailureResponse("Tên danh mục không được để trống", "ValidationError", HttpStatusCode.BadRequest);
+                    return ApiResponse<bool>.FailureResponse("Tên danh mục không được để trống", HttpStatusCode.BadRequest);
                 }
 
                 var newCategory = new Category
@@ -89,7 +89,7 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi tạo danh mục", "ServerError", HttpStatusCode.InternalServerError);
+                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi tạo danh mục", HttpStatusCode.InternalServerError);
             }
         }
 
@@ -102,12 +102,12 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
 
                 if (category == null)
                 {
-                    return ApiResponse<bool>.FailureResponse("Danh mục không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                    return ApiResponse<bool>.FailureResponse("Danh mục không tồn tại", HttpStatusCode.NotFound);
                 }
 
                 if (request.ParentId == id)
                 {
-                    return ApiResponse<bool>.FailureResponse("Danh mục cha không thể là chính nó", "ValidationError", HttpStatusCode.BadRequest);
+                    return ApiResponse<bool>.FailureResponse("Danh mục cha không thể là chính nó", HttpStatusCode.BadRequest);
                 }
 
                 category.Name = request.Name;
@@ -119,11 +119,11 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
                 await _unitOfWork.Categories.UpdateAsync(category);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<bool>.SuccessResponse(true, "Cập nhật danh mục thành công", HttpStatusCode.OK);
+                return ApiResponse<bool>.SuccessResponse(true, "Cập nhật danh mục thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi cập nhật danh mục", "ServerError", HttpStatusCode.InternalServerError);
+                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi cập nhật danh mục", HttpStatusCode.InternalServerError);
             }
         }
 
@@ -136,23 +136,23 @@ namespace ClothingShop.Application.Services.CategoryService.Impl
 
                 if (category == null)
                 {
-                    return ApiResponse<bool>.FailureResponse("Danh mục không tồn tại", "NotFound", HttpStatusCode.NotFound);
+                    return ApiResponse<bool>.FailureResponse("Danh mục không tồn tại", HttpStatusCode.NotFound);
                 }
 
                 bool hasChildren = allData.Any(c => c.ParentId == id);
                 if (hasChildren)
                 {
-                    return ApiResponse<bool>.FailureResponse("Không thể xóa danh mục đang chứa danh mục con", "Conflict", HttpStatusCode.Conflict);
+                    return ApiResponse<bool>.FailureResponse("Không thể xóa danh mục đang chứa danh mục con", HttpStatusCode.Conflict);
                 }
 
                 _unitOfWork.Categories.Delete(category);
                 await _unitOfWork.SaveChangesAsync();
 
-                return ApiResponse<bool>.SuccessResponse(true, "Xóa danh mục thành công", HttpStatusCode.OK);
+                return ApiResponse<bool>.SuccessResponse(true, "Xóa danh mục thành công");
             }
             catch (Exception ex)
             {
-                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi xóa danh mục", "ServerError", HttpStatusCode.InternalServerError);
+                return ApiResponse<bool>.FailureResponse("Đã xảy ra lỗi khi xóa danh mục", HttpStatusCode.InternalServerError);
             }
         }
 
